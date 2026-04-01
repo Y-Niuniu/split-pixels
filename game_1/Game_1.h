@@ -2,6 +2,10 @@
 #define GAME_1_H
 
 #include "Menu.h"
+#include "Joystick.h"
+#include "Buzzer.h"
+#include "PWM.h"
+#include "LCD.h"
 
 /**
  * @brief Game 1 - Student can implement their own game here
