@@ -8,129 +8,190 @@
 #include <stdio.h>
 #include "Joystick.h"
 #include <stdbool.h> 
+#include <math.h>
+#include "tools/selector.h"
+
 extern ST7789V2_cfg_t cfg0;
-extern PWM_cfg_t pwm_cfg;      // LED PWM control
-extern Buzzer_cfg_t buzzer_cfg; // Buzzer control
-extern Joystick_cfg_t joystick_cfg; // Joystick control
+extern PWM_cfg_t pwm_cfg;
+extern Buzzer_cfg_t buzzer_cfg;
+extern Joystick_cfg_t joystick_cfg;
 extern Joystick_t joystick_data;
+extern MenuSystem menu; 
+extern InputState current_input; 
 
-/**
- * @brief Game 1 Implementation - Student can modify
- * 
- * EXAMPLE: Shows how to use PWM LED for visual feedback
- * This is a placeholder with a bouncing animation that changes LED brightness.
- * Replace this with your actual game logic!
- */
+// FSM state
+typedef enum {
+    RUNNING,
+    PAUSED   
+} Game1State_t;
+static Game1State_t current_state = RUNNING;
 
-// Game state - customize for your game
-static uint32_t animation_counter = 0;
-static int16_t moving_x = 0;
-static int8_t move_direction = 1;
+// Exit button area
+#define EXIT_X 0
+#define EXIT_Y 10
+#define EXIT_WIDTH 27
+#define EXIT_HEIGHT 51
 
-// Frame rate for this game (in milliseconds)
-#define GAME1_FRAME_TIME_MS 30  // ~33 FPS
+// Global cursor
+static int16_t cursor_x = 10;   
+static int16_t cursor_y = 30;
+static uint32_t last_move_tick = 0;
+#define CURSOR_STEP 5          
+#define MOVE_DELAY_MS 30        
 
-/**
- * @brief Initialize Game 1
- * Called once when the game starts
- */
-static void Game1_Init(void) {
-    animation_counter = 0;
-    moving_x = 0;
-    move_direction = 1;
-    
-    // Play a brief startup sound
-    buzzer_tone(&buzzer_cfg, 1000, 30);  // 1kHz at 30% volume
-    HAL_Delay(50);  // Brief beep duration
-    buzzer_off(&buzzer_cfg);  // Stop the buzzer
+// Ball game state
+static int ball_x = 120;
+static int ball_y = 160;
+static int vel_x = 3;
+static int vel_y = 2;
+static int score = 0;
+
+#define GAME1_FRAME_TIME_MS 30
+
+static bool IsJoystickCentered(float threshold) {
+    return (fabsf(joystick_data.coord_mapped.x) < threshold &&
+            fabsf(joystick_data.coord_mapped.y) < threshold);
 }
 
-/**
- * @brief Update Game 1 logic
- * Called once per frame. Returns true to continue game, false to exit.
- */
-static bool Game1_Update(void) {
-    // Read input
-    Input_Read();
-    
-    // Check if button was pressed to return to menu
+void Game1_Init(void) {
+    ball_x = 120;
+    ball_y = 160;
+    vel_x = 3;
+    vel_y = 2;
+    score = 0;
+    current_state = RUNNING;
+    cursor_x = 10;
+    cursor_y = 30;
+    last_move_tick = 0;
+}
+
+
+static void HandleGlobalCursor(void) {
+    Direction dir = joystick_data.direction;
+    if (dir == CENTRE) return;
+
+    uint32_t now = HAL_GetTick();
+    if ((now - last_move_tick) >= MOVE_DELAY_MS) {
+        int dx = 0, dy = 0;
+        switch (dir) {
+            case N: dy = -CURSOR_STEP; break;
+            case NE: dx = CURSOR_STEP; dy = -CURSOR_STEP; break;
+            case E: dx = CURSOR_STEP; break;
+            case SE: dx = CURSOR_STEP; dy = CURSOR_STEP; break;
+            case S: dy = CURSOR_STEP; break;
+            case SW: dx = -CURSOR_STEP; dy = CURSOR_STEP; break;
+            case W: dx = -CURSOR_STEP; break;
+            case NW: dx = -CURSOR_STEP; dy = -CURSOR_STEP; break;
+            default: break;
+        }
+        cursor_x += dx;
+        cursor_y += dy;
+      
+        if (cursor_x < 0) cursor_x = 0;
+        if (cursor_x >= 240) cursor_x = 239;
+        if (cursor_y < 0) cursor_y = 0;
+        if (cursor_y >= 240) cursor_y = 239;
+        last_move_tick = now;
+    }
+}
+
+static bool Game1_Update_Running(void) {
+
+    HandleGlobalCursor();
+
+    // 2. 检查退出条件：光标在退出区域内 且 BT3 按下
     if (current_input.btn3_pressed) {
-        PWM_SetDuty(&pwm_cfg, 50);  // Reset LED to 50% when returning
-        return false;  // Exit game
+        if (cursor_x >= EXIT_X && cursor_x <= EXIT_X + EXIT_WIDTH &&
+            cursor_y >= EXIT_Y && cursor_y <= EXIT_Y + EXIT_HEIGHT) {
+                current_state = PAUSED;
+                return true;  
+        }
     }
-    
-    // UPDATE: Game logic
-    animation_counter++;
-    
-    // Simple animation: move object back and forth
-    moving_x += move_direction * 3;
-    if (moving_x >= 200 || moving_x <= 0) {
-        move_direction *= -1;
-    }
-    
-    // Example: Vary LED brightness based on animation
-    uint8_t brightness = (moving_x * 100) / 200;
-    PWM_SetDuty(&pwm_cfg, brightness);
-    
-    return true;  // Continue game
+
+    ball_x += vel_x;
+    ball_y += vel_y;
+    if (ball_x <= 0 || ball_x >= 230) vel_x = -vel_x;
+    if (ball_y <= 0 || ball_y >= 230) vel_y = -vel_y;
+    score++;
+    if (score > 1000) score = 0;
+
+    return true;
 }
 
-/**
- * @brief Render Game 1
- * Called once per frame after Update()
- */
+static bool Game1_Update_Paused(void) {
+    select_system_t selector;
+    Selector_Init(&selector);
+    operation_t result = Selector_Run(&selector);
+    
+    if (result == RESUME) {
+        current_state = RUNNING;
+        return true;
+    } else {
+        return false; 
+    }
+}
+
+static bool Game1_Update(void) {
+    Input_Read();
+    Joystick_Read(&joystick_cfg, &joystick_data);  
+
+    switch (current_state) {
+        case RUNNING:
+            if (!Game1_Update_Running()) {
+                return false;
+            }
+            break;
+        case PAUSED:
+            if (!Game1_Update_Paused()) {
+                return false;
+            }
+            break;
+    }
+    return true;
+}
+
 static void Game1_Render(void) {
-    // RENDER: Draw to LCD
     LCD_Fill_Buffer(0);
     
-    // Title
     LCD_printString("GAME 1", 60, 10, 1, 3);
+    char ball_char = 'O';
+    LCD_printString(&ball_char, ball_x, ball_y, 1, 2);
+    char score_str[32];
+    sprintf(score_str, "Score: %d", score);
+    LCD_printString(score_str, 50, 200, 1, 1);
     
-    // Simple animated object (moving box)
-    LCD_printString("[*]", 20 + moving_x, 100, 1, 3);
     
-    // Display counter
-    char counter[32];
-    sprintf(counter, "Frame: %lu", animation_counter);
-    LCD_printString(counter, 50, 150, 1, 2);
+    LCD_Draw_Rect(EXIT_X, EXIT_Y, EXIT_WIDTH, EXIT_HEIGHT, 2, 0); // 只画边框，不填充
+    LCD_printString("Exit", 5, 25, 1, 1);
     
-    // Show PWM LED usage
-    LCD_printString("LED: PWM Demo", 30, 180, 1, 1);
-    char pwm_str[32];
-    sprintf(pwm_str, "Brightness: %d%%", (moving_x * 100) / 200);
-    LCD_printString(pwm_str, 30, 195, 1, 1);
+  
+    LCD_Draw_Rect(cursor_x-2, cursor_y-2, 4, 4, 1, 1);
     
-    // Instructions
-    LCD_printString("Press BT3 to", 40, 220, 1, 1);
-    LCD_printString("Return to Menu", 40, 235, 1, 1);
+    if (current_state == PAUSED) {
+        LCD_printString("PAUSED", 70, 120, 1, 3);
+        LCD_printString("resume", 40, 140, 1, 1);
+        LCD_printString(" exit", 120, 140, 1, 1);
+    }
     
     LCD_Refresh(&cfg0);
 }
 
 MenuState Game1_Run(void) {
-    // Initialize game
     Game1_Init();
+    MenuState exit_state = MENU_STATE_HOME;
     
-    MenuState exit_state = MENU_STATE_HOME;  // Default: return to menu
-    
-    // Game's own loop - runs until exit condition
     while (1) {
         uint32_t frame_start = HAL_GetTick();
         
-        // Update game logic
         if (!Game1_Update()) {
-            break;  // Exit game loop
+            break;
         }
-        
-        // Render game
         Game1_Render();
         
-        // Frame timing - wait for remainder of frame time
         uint32_t frame_time = HAL_GetTick() - frame_start;
         if (frame_time < GAME1_FRAME_TIME_MS) {
             HAL_Delay(GAME1_FRAME_TIME_MS - frame_time);
         }
     }
-    
-    return exit_state;  // Tell main where to go next
+    return exit_state;
 }
