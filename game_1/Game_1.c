@@ -10,7 +10,8 @@
 #include <stdbool.h> 
 #include <math.h>
 #include "tools/selector.h"
-
+#include "sprites/bullet_background.h"
+#include"engine/engine.h"
 extern ST7789V2_cfg_t cfg0;
 extern PWM_cfg_t pwm_cfg;
 extern Buzzer_cfg_t buzzer_cfg;
@@ -39,12 +40,7 @@ static uint32_t last_move_tick = 0;
 #define CURSOR_STEP 5          
 #define MOVE_DELAY_MS 30        
 
-// Ball game state
-static int ball_x = 120;
-static int ball_y = 160;
-static int vel_x = 3;
-static int vel_y = 2;
-static int score = 0;
+
 
 #define GAME1_FRAME_TIME_MS 30
 
@@ -54,15 +50,13 @@ static bool IsJoystickCentered(float threshold) {
 }
 
 void Game1_Init(void) {
-    ball_x = 120;
-    ball_y = 160;
-    vel_x = 3;
-    vel_y = 2;
-    score = 0;
+   
     current_state = RUNNING;
     cursor_x = 10;
     cursor_y = 30;
     last_move_tick = 0;
+    Engine_Init();
+
 }
 
 
@@ -99,7 +93,7 @@ static bool Game1_Update_Running(void) {
 
     HandleGlobalCursor();
 
-    // 2. 检查退出条件：光标在退出区域内 且 BT3 按下
+    
     if (current_input.btn3_pressed) {
         if (cursor_x >= EXIT_X && cursor_x <= EXIT_X + EXIT_WIDTH &&
             cursor_y >= EXIT_Y && cursor_y <= EXIT_Y + EXIT_HEIGHT) {
@@ -107,14 +101,8 @@ static bool Game1_Update_Running(void) {
                 return true;  
         }
     }
-
-    ball_x += vel_x;
-    ball_y += vel_y;
-    if (ball_x <= 0 || ball_x >= 230) vel_x = -vel_x;
-    if (ball_y <= 0 || ball_y >= 230) vel_y = -vel_y;
-    score++;
-    if (score > 1000) score = 0;
-
+    Engine_Update();
+    
     return true;
 }
 
@@ -151,18 +139,11 @@ static bool Game1_Update(void) {
 }
 
 static void Game1_Render(void) {
-    LCD_Fill_Buffer(0);
+   
+    Engine_Render();
+   
     
-    LCD_printString("GAME 1", 60, 10, 1, 3);
-    char ball_char = 'O';
-    LCD_printString(&ball_char, ball_x, ball_y, 1, 2);
-    char score_str[32];
-    sprintf(score_str, "Score: %d", score);
-    LCD_printString(score_str, 50, 200, 1, 1);
-    
-    
-    LCD_Draw_Rect(EXIT_X, EXIT_Y, EXIT_WIDTH, EXIT_HEIGHT, 2, 0); // 只画边框，不填充
-    LCD_printString("Exit", 5, 25, 1, 1);
+   LCD_Draw_Sprite(0, 10, 50, 26, (const uint8_t*)EXIT_BUTTON_FRAME0);
     
   
     LCD_Draw_Rect(cursor_x-2, cursor_y-2, 4, 4, 1, 1);
