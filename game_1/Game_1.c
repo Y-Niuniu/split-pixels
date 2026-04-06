@@ -34,10 +34,10 @@ static Game1State_t current_state = RUNNING;
 #define EXIT_HEIGHT 51
 
 // Global cursor
-static int16_t cursor_x = 10;   
-static int16_t cursor_y = 30;
-static uint32_t last_move_tick = 0;
-#define CURSOR_STEP 5          
+int16_t cursor_x = 120;   
+int16_t cursor_y = 120;
+uint32_t last_move_tick = 0;
+#define CURSOR_STEP 8          
 #define MOVE_DELAY_MS 30        
 
 
@@ -52,8 +52,8 @@ static bool IsJoystickCentered(float threshold) {
 void Game1_Init(void) {
    
     current_state = RUNNING;
-    cursor_x = 10;
-    cursor_y = 30;
+    cursor_x = 120;
+    cursor_y = 120;
     last_move_tick = 0;
     Engine_Init();
 
