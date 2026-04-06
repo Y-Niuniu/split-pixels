@@ -71,6 +71,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 
     ${CMAKE_SOURCE_DIR}/game_2/Game_2.c
     ${CMAKE_SOURCE_DIR}/game_3/Game_3.c
+    ${CMAKE_SOURCE_DIR}/game_3/AstroEngine/AstroEngine.c
+    ${CMAKE_SOURCE_DIR}/game_3/Spaceship/Spaceship.c
+    ${CMAKE_SOURCE_DIR}/game_3/Bullet/Bullet.c
 )
 
 # Add include paths
