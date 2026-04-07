@@ -13,6 +13,8 @@
 #include <math.h>
 #include "sprites/bullet_background.h"
 #include "sprites/plants.h"
+#include "sprites/arrows.h"
+
 extern ST7789V2_cfg_t cfg0;
 extern PWM_cfg_t pwm_cfg;
 extern Buzzer_cfg_t buzzer_cfg;
@@ -163,6 +165,7 @@ void Engine_Render(void){
  LCD_Fill_Buffer(0);
 //background for select plants
 LCD_Draw_Sprite(77, 10, 50, 51, (const uint8_t*)TEST_select_walnut);
+LCD_Draw_Sprite(77, 60, 30, 51, (const uint8_t*)arrow_wallnut_frame0);
 
 /*
  //background first roll of battlefield

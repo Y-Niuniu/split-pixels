@@ -60,8 +60,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/game_1/engine/engine.c
     ${CMAKE_SOURCE_DIR}/game_1/sprites/bullet_background.c
     ${CMAKE_SOURCE_DIR}/game_1/sprites/plants.c
-
-
+    ${CMAKE_SOURCE_DIR}/game_1/sprites/arrows.c
 
 
 
