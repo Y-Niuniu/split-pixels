@@ -45,6 +45,11 @@ extern int16_t cursor_x, cursor_y;
 #define doomshroom_select_y 10
 #define doomshroom_select_width 50
 #define doomshroom_select_height 51
+//define shovel selection area
+#define shovel_select_x 0
+#define shovel_select_y 60
+#define shovel_select_width 26
+#define shovel_select_height 30
 //defien battlefield area
 #define b_cols 5
 #define b_rows 3
@@ -54,6 +59,7 @@ static const uint16_t b_x[b_cols] = {10, 52, 94, 136, 178};
 static const uint16_t b_y[b_rows] = {90, 140, 190};
 static int8_t sel_col = -1;
 static int8_t sel_row = -1;
+static bool shovel_mod = false;
 /*static int8_t perv_sel_col = -1;
 static int8_t perv_sel_row = -1;*/
 //FSM for plant selection
@@ -91,9 +97,7 @@ static const Direction doomshroom_charge[]={N,E,S,S};
 
 static uint32_t last_charge_time = 0;
 #define INPUT_DELAY_MS 200
-#define ANIM_FRAME_DELAY 50
-static uint8_t wallnut_ready_anim_frame = 0;
-static uint32_t wallnut_anim_last_time = 0;
+
 
 //game engine logic
 void Engine_Init(void){
@@ -111,6 +115,15 @@ for(int row=0;row<b_rows;row++){
 void Engine_Update(void){
     Joystick_Read(&joystick_cfg2, &joystick_data2);
 if (current_input.btn3_pressed) {
+     if (cursor_x >= shovel_select_x && cursor_x <= shovel_select_x + shovel_select_width &&
+        cursor_y >= shovel_select_y && cursor_y <= shovel_select_y + shovel_select_height) {
+        shovel_mod = !shovel_mod;   
+        return;  
+    }
+    if (shovel_mod) {
+        shovel_mod = false;
+        return;
+    }
     if(current_selection!=select_none){
         current_selection = select_none;
     }
@@ -130,6 +143,13 @@ else{
     }
 }
 }
+if (current_input.btn2_pressed && shovel_mod) {
+    if (sel_col != -1 && sel_row != -1 && battle_grid[sel_row][sel_col] != plant_none) {
+        battle_grid[sel_row][sel_col] = plant_none;   
+        shovel_mod = false;                          
+    }
+} 
+else{
 switch (current_selection) {
     case select_wallnut:
       if (current_input.btn2_pressed && sel_col != -1 && sel_row != -1 &&
@@ -155,6 +175,7 @@ switch (current_selection) {
     case select_none:
         // No selection or handle default case
         break;
+}
 }
 switch (walnut_state) {
     case WALNUT_CHARGING:
@@ -224,9 +245,25 @@ void Engine_Render(void){
 //background for select plants
 
 LCD_Draw_Sprite(77, 10, 50, 51, (const uint8_t*)TEST_select_walnut);
+LCD_Draw_Sprite(26, 10, 50, 51, (const uint8_t*)TEST_select_shooter);
+LCD_Draw_Sprite(128, 10, 50, 51, (const uint8_t*)TEST_select_bomb);
+LCD_Draw_Sprite(179, 10, 50, 51, (const uint8_t*)TEST_select_doomshroom);
+LCD_Draw_Sprite(26, 60, 30, 51, (const uint8_t *) ARROW_SHOOTER_FRAMES[0]);
+LCD_Draw_Sprite(128, 60, 30, 51, (const uint8_t *) ARROW_BOMB_FRAMES[0]);
+LCD_Draw_Sprite(179, 60, 30, 51, (const uint8_t *) ARROW_DOOMSHROOM_FRAMES[0]);
+LCD_Draw_Sprite(220, 10, 80, 20, (const uint8_t *)TEST_GENERATE); 
+LCD_Draw_Sprite(220, 90, 50, 20, (const uint8_t *)TEST_GENERATE); 
+LCD_Draw_Sprite(220, 140, 50, 20, (const uint8_t *)TEST_GENERATE); 
+LCD_Draw_Sprite(220, 190, 50, 20, (const uint8_t *)TEST_GENERATE); 
+LCD_Draw_Sprite(0, 90, 50, 10, (const uint8_t *)TEST_faildetect); 
+LCD_Draw_Sprite(0, 140, 50, 10, (const uint8_t *)TEST_faildetect); 
+LCD_Draw_Sprite(0, 190, 50, 10, (const uint8_t *)TEST_faildetect); 
+LCD_Draw_Sprite(0, 60, 30, 26, (const uint8_t *)TEST_SHOVEL);
+ if(shovel_mod)  {
+    LCD_Draw_Rect(0, 60, 30, 26, 2, 0);
+ }
 
-    
-    switch (walnut_state) {
+switch (walnut_state) {
         case WALNUT_IDLE:
             LCD_Draw_Sprite(77, 60, 30, 51, (const uint8_t*)ARROW_WALLNUT_FRAMES[3]);
             break;

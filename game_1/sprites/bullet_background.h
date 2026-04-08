@@ -11,4 +11,5 @@ extern const uint8_t EXIT_BUTTON_FRAME0[50][26];
 extern const uint8_t TEST_ROWER[10][10];
 extern const uint8_t TEST_GENERATE[50][20];
 extern const uint8_t TEST_faildetect[50][10];
+extern const uint8_t TEST_SHOVEL[30][26];
 #endif

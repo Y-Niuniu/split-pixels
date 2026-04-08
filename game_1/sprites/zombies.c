@@ -129,7 +129,7 @@ const uint8_t TEST_ZOMBIE1_FRAME2[40][27] = {
     { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
 };
 
-const uint8_t* TEST_ZOMBIE1_FRAMES ={
+const uint8_t* TEST_ZOMBIE1_FRAMES[TEST_ZOMBIE1_FRAME_COUNT] ={
      (const uint8_t*)TEST_ZOMBIE1_FRAME0, 
      (const uint8_t*)TEST_ZOMBIE1_FRAME1, 
      (const uint8_t*)TEST_ZOMBIE1_FRAME2 
@@ -287,7 +287,7 @@ const uint8_t TEST_ZOMBIE2_FRAME2[50][32] = {
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
-const uint8_t* TEST_ZOMBIE2_FRAMES ={
+const uint8_t* TEST_ZOMBIE2_FRAMES[TEST_ZOMBIE2_FRAME_COUNT] ={
      (const uint8_t*)TEST_ZOMBIE2_FRAME0, 
      (const uint8_t*)TEST_ZOMBIE2_FRAME1, 
      (const uint8_t*)TEST_ZOMBIE2_FRAME2 
