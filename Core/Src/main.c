@@ -88,9 +88,19 @@ Joystick_cfg_t joystick_cfg = {
     .deadzone = JOYSTICK_DEADZONE,
     .setup_done = 0
 };
-
+Joystick_cfg_t joystick_cfg2 = {
+    .adc = &hadc1,
+    .x_channel = ADC_CHANNEL_5, //A0 on Nucleo board
+    .y_channel = ADC_CHANNEL_6, //A1 on Nucleo board
+    .sampling_time = ADC_SAMPLETIME_47CYCLES_5,
+    .center_x = JOYSTICK_DEFAULT_CENTER_X,
+    .center_y = JOYSTICK_DEFAULT_CENTER_Y,
+    .deadzone = JOYSTICK_DEADZONE,
+    .setup_done = 0
+};
 // Joystick data structure to hold readings
 Joystick_t joystick_data;
+Joystick_t joystick_data2;
 
 // ===== PWM CONFIGURATION =====
 // Configure PWM to use TIM4 Channel 1 (current hardware setup)
@@ -217,6 +227,7 @@ int main(void)
     
     // Initialize Joystick
     Joystick_Init(&joystick_cfg);
+    Joystick_Init(&joystick_cfg2);
     
     // Clear screen
     LCD_Fill_Buffer(0);

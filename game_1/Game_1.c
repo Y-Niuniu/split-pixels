@@ -9,7 +9,7 @@
 #include "Joystick.h"
 #include <stdbool.h> 
 #include <math.h>
-#include "tools/selector.h"
+#include "shared/selector.h"
 #include "sprites/bullet_background.h"
 #include"engine/engine.h"
 extern ST7789V2_cfg_t cfg0;
@@ -19,7 +19,8 @@ extern Joystick_cfg_t joystick_cfg;
 extern Joystick_t joystick_data;
 extern MenuSystem menu; 
 extern InputState current_input; 
-
+extern Joystick_t joystick_data2;
+extern Joystick_cfg_t joystick_cfg2;
 // FSM state
 typedef enum {
     RUNNING,
@@ -122,6 +123,7 @@ static bool Game1_Update_Paused(void) {
 static bool Game1_Update(void) {
     Input_Read();
     Joystick_Read(&joystick_cfg, &joystick_data);  
+     Joystick_Read(&joystick_cfg2, &joystick_data2);
 
     switch (current_state) {
         case RUNNING:

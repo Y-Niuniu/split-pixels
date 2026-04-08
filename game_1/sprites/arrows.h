@@ -1,22 +1,16 @@
 #ifndef ARROWS_H
 #define ARROWS_H
 #include <stdint.h>
-extern const uint8_t arrow_wallnut_frame0[30][51];
-extern const uint8_t arrow_wallnut_frame1[30][51];
-extern const uint8_t arrow_wallnut_frame2[30][51];
-extern const uint8_t arrow_wallnut_frame3[30][51];
-extern const uint8_t arrow_shooter_frame0[30][51];
-extern const uint8_t arrow_shooter_frame1[30][51];
-extern const uint8_t arrow_shooter_frame2[30][51];
-extern const uint8_t arrow_shooter_frame3[30][51];
-extern const uint8_t arrow_bomb_frame0[30][51];
-extern const uint8_t arrow_bomb_frame1[30][51];
-extern const uint8_t arrow_bomb_frame2[30][51];
-extern const uint8_t arrow_bomb_frame3[30][51];
-extern const uint8_t arrow_bomb_frame4[30][51];
-extern const uint8_t arrow_doomshroom_frame0[30][51];
-extern const uint8_t arrow_doomshroom_frame1[30][51];
-extern const uint8_t arrow_doomshroom_frame2[30][51];
-extern const uint8_t arrow_doomshroom_frame3[30][51];
-extern const uint8_t arrow_doomshroom_frame4[30][51];
+
+#define ARROW_WALLNUT_FRAME_COUNT 4
+extern const uint8_t* ARROW_WALLNUT_FRAMES[ARROW_WALLNUT_FRAME_COUNT];
+
+#define ARROW_SHOOTER_FRAME_COUNT 4
+extern const uint8_t* ARROW_SHOOTER_FRAMES[ARROW_SHOOTER_FRAME_COUNT];
+
+#define ARROW_BOMB_FRAME_COUNT 5
+extern const uint8_t* ARROW_BOMB_FRAMES[ARROW_BOMB_FRAME_COUNT];
+
+#define ARROW_DOOMSHROOM_FRAME_COUNT 5
+extern const uint8_t* ARROW_DOOMSHROOM_FRAMES[ARROW_DOOMSHROOM_FRAME_COUNT];
 #endif

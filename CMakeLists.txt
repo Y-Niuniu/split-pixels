@@ -53,10 +53,10 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Menu system (shared)
     ${CMAKE_SOURCE_DIR}/shared/Menu.c
     ${CMAKE_SOURCE_DIR}/shared/InputHandler.c
-    
+    ${CMAKE_SOURCE_DIR}/shared/selector.c
     # Game implementations (placeholder - students implement these)
     ${CMAKE_SOURCE_DIR}/game_1/Game_1.c
-    ${CMAKE_SOURCE_DIR}/game_1/tools/selector.c
+    
     ${CMAKE_SOURCE_DIR}/game_1/engine/engine.c
     ${CMAKE_SOURCE_DIR}/game_1/sprites/bullet_background.c
     ${CMAKE_SOURCE_DIR}/game_1/sprites/plants.c
