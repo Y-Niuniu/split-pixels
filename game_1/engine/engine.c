@@ -228,7 +228,6 @@ LCD_Draw_Sprite(77, 10, 50, 51, (const uint8_t*)TEST_select_walnut);
     
     switch (walnut_state) {
         case WALNUT_IDLE:
-         
             LCD_Draw_Sprite(77, 60, 30, 51, (const uint8_t*)ARROW_WALLNUT_FRAMES[3]);
             break;
         case WALNUT_CHARGING:

@@ -1,0 +1,10 @@
+#ifndef ZOMBIES_H
+#define ZOMBIES_H
+#include <stdint.h>
+#define TEST_ZOMBIE1_FRAME_COUNT 3
+extern const uint8_t* TEST_ZOMBIE1_FRAMES[TEST_ZOMBIE1_FRAME_COUNT];
+#define TEST_ZOMBIE2_FRAME_COUNT 3
+extern const uint8_t* TEST_ZOMBIE2_FRAMES[TEST_ZOMBIE2_FRAME_COUNT];
+
+
+#endif
