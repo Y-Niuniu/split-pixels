@@ -21,10 +21,12 @@ extern MenuSystem menu;
 extern InputState current_input; 
 extern Joystick_t joystick_data2;
 extern Joystick_cfg_t joystick_cfg2;
+bool Is_nuclaunched(void);
 // FSM state
 typedef enum {
     RUNNING,
-    PAUSED   
+    PAUSED,
+    NULCEND   
 } Game1State_t;
 static Game1State_t current_state = RUNNING;
 
@@ -41,7 +43,7 @@ uint32_t last_move_tick = 0;
 #define CURSOR_STEP 8          
 #define MOVE_DELAY_MS 30        
 
-
+static uint32_t doomshroom_timer_start = 0;
 
 #define GAME1_FRAME_TIME_MS 30
 
@@ -93,7 +95,11 @@ static void HandleGlobalCursor(void) {
 static bool Game1_Update_Running(void) {
 
     HandleGlobalCursor();
-
+  if(Is_nuclaunched()){
+    current_state=NULCEND;
+    doomshroom_timer_start = HAL_GetTick();
+    return true;
+  }
     
     if (current_input.btn3_pressed) {
         if (cursor_x >= EXIT_X && cursor_x <= EXIT_X + EXIT_WIDTH &&
@@ -120,6 +126,16 @@ static bool Game1_Update_Paused(void) {
     }
 }
 
+static bool Game1_Update_Nulcend(void)
+{
+    LCD_Fill_Buffer(1); 
+    if (HAL_GetTick() - doomshroom_timer_start >= 5000) { 
+        return true; 
+    }
+    return false; 
+}
+
+
 static bool Game1_Update(void) {
     Input_Read();
     Joystick_Read(&joystick_cfg, &joystick_data);  
@@ -136,6 +152,14 @@ static bool Game1_Update(void) {
                 return false;
             }
             break;
+        case NULCEND:
+           
+           
+            if (Game1_Update_Nulcend()) {
+                return false; 
+            }
+            
+            break;
     }
     return true;
 }
@@ -146,7 +170,12 @@ static void Game1_Render(void) {
    
     
    LCD_Draw_Sprite(0, 10, 50, 26, (const uint8_t*)EXIT_BUTTON_FRAME0);
-    
+    if(current_state==NULCEND){
+        LCD_Fill_Buffer(1);
+        LCD_printString("BOOM!", 70, 120, 0, 4);
+        LCD_Refresh(&cfg0);
+        return;
+    }
   
     LCD_Draw_Rect(cursor_x-2, cursor_y-2, 4, 4, 1, 1);
     
