@@ -2,7 +2,7 @@
 #define ARROWS_H
 #include <stdint.h>
 
-#define ARROW_WALLNUT_FRAME_COUNT 4
+#define ARROW_WALLNUT_FRAME_COUNT 5
 extern const uint8_t* ARROW_WALLNUT_FRAMES[ARROW_WALLNUT_FRAME_COUNT];
 
 #define ARROW_SHOOTER_FRAME_COUNT 4

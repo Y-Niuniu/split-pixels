@@ -271,7 +271,7 @@ switch (walnut_state) {
             LCD_Draw_Sprite(77, 60, 30, 51, (const uint8_t*)ARROW_WALLNUT_FRAMES[0]);
             break;
         case WALNUT_READY:
-            LCD_Draw_Sprite(77, 60, 30, 51, (const uint8_t*)ARROW_WALLNUT_FRAMES[ARROW_WALLNUT_FRAME_COUNT - 1]);
+            LCD_Draw_Sprite(77, 60, 30, 51, (const uint8_t*)ARROW_WALLNUT_FRAMES[4]);
             break;
         case WALNUT_SEQUENCE:
             LCD_Draw_Sprite(77, 60, 30, 51, ARROW_WALLNUT_FRAMES[wallnut_steps]);
