@@ -78,15 +78,15 @@ int zombies_per_row=1;
 int bucket_chance=0;
 if(passed_time<60){
 zombies_per_row=1+(rand()%2);
-int bucket_chance=0;
+bucket_chance=0;
 }
 else if(passed_time<120){
 zombies_per_row=2+(rand()%2);
-int bucket_chance=40;
+bucket_chance=40;
 }
 else{
 zombies_per_row=3+(rand()%2);
-int bucket_chance=60;
+bucket_chance=60;
 }
 }
 
@@ -102,12 +102,13 @@ for(int row=0;row<3;row++){
 
 }
 
-void Zombie_Render(void){
-    for(int i=0;i<MAX_ZOMBIES;i++){
-        if(!zombie_instances[i].is_alive)
-        const uint8_t* sprite = zombie_status[zombie_instances[i].type].sprite;
-    if(sprite){
-        LCD_Draw_Sprite(zombie_instances[i].x, zombie_instances[i].y, 27,40,TEST_ZOMBIE1_FRAMES[2] );
+void Zombie_Render(void) {
+    for (int i = 0; i < MAX_ZOMBIES; i++) {
+        if (zombie_instances[i].is_alive) {
+            const uint8_t* sprite = zombie_status[zombie_instances[i].type].sprite;
+            if (sprite) {
+                LCD_Draw_Sprite(zombie_instances[i].x, zombie_instances[i].y, 40, 27, sprite);
+            }
+        }
     }
-}
 }
