@@ -14,6 +14,9 @@
 #include "sprites/bullet_background.h"
 #include "sprites/plants.h"
 #include "sprites/arrows.h"
+#include"interact.h"
+#include"data/zombiedata.h"
+#include"data/plantdata.h"
 
 extern ST7789V2_cfg_t cfg0;
 extern PWM_cfg_t pwm_cfg;
@@ -26,6 +29,7 @@ extern MenuSystem menu;
 extern InputState current_input; 
 extern int16_t cursor_x, cursor_y;
 bool Is_nuclaunched(void);
+//wallnut selection area
 #define wallnut_select_x 77
 #define wallnut_select_y 10
 #define wallnut_select_width 50
@@ -55,14 +59,14 @@ bool Is_nuclaunched(void);
 #define b_rows 3
 #define cell_width 50
 #define cell_height 42
+//determine battlefield cell positions
 static const uint16_t b_x[b_cols] = {10, 52, 94, 136, 178};
 static const uint16_t b_y[b_rows] = {90, 140, 190};
 static uint32_t bomb_planted_time[b_rows][b_cols];
 static int8_t sel_col = -1;
 static int8_t sel_row = -1;
 static bool shovel_mod = false;
-/*static int8_t perv_sel_col = -1;
-static int8_t perv_sel_row = -1;*/
+
 //FSM for plant selection
 typedef enum {
     select_none,
@@ -137,9 +141,19 @@ static uint32_t bomb_last_charge_time = 0;
 static uint32_t doomshroom_last_charge_time = 0;
 
 
+
+//FSM for zombies
+typedef enum {
+zombie_moving,
+zombie_attack,
+zombie_died,
+zombie_win
+}zombiestatus_t;
+
+
 #define INPUT_DELAY_MS 200
 bool Is_nuclaunched(void){
-    return nuclaunch;
+    return nuclaunch;// if true return to main menu
 }
 
 //game engine logic
@@ -150,8 +164,7 @@ sel_row = -1;
 nuclaunch=false;
 doomshroom_state = DOOMSHROOM_INACTIVE;
 doomshroom_timer_start = HAL_GetTick(); 
-/*perv_sel_col = -1;
-perv_sel_row = -1;*/
+//make sure all cells are empty
 for(int row=0;row<b_rows;row++){
     for(int col=0;col<b_cols;col++){
         battle_grid[row][col] = plant_none;
@@ -172,7 +185,7 @@ if (current_input.btn3_pressed) {
         return;
     }
     if(current_selection!=select_none){
-        current_selection = select_none;
+        current_selection = select_none;// first decide is shovel mod then select plant
     }
 else{
     if (cursor_x >= wallnut_select_x && cursor_x <= wallnut_select_x + wallnut_select_width &&
@@ -261,7 +274,7 @@ switch (current_selection) {
         break;
 }
 }
-//press btn9 to charge only one plant
+//press btn9 to charge only one plant to avoid bugs
 if(current_input.btn9_pressed){
    if(shooter_state == SHOOTER_READY){
         shooter_state = SHOOTER_SEQUENCE;

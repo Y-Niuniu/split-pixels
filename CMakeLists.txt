@@ -61,9 +61,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/game_1/sprites/plants.c
     ${CMAKE_SOURCE_DIR}/game_1/sprites/arrows.c
     ${CMAKE_SOURCE_DIR}/game_1/sprites/zombies.c
-
-
-
+    ${CMAKE_SOURCE_DIR}/game_1/data/plantdata.c
+    ${CMAKE_SOURCE_DIR}/game_1/data/zombiedata.c
+    ${CMAKE_SOURCE_DIR}/game_1/engine/interact.c
 
 
     ${CMAKE_SOURCE_DIR}/game_2/Game_2.c
