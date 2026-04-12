@@ -55,18 +55,15 @@ bool Is_nuclaunched(void);
 #define shovel_select_width 26
 #define shovel_select_height 30
 //defien battlefield area
-#define b_cols 5
-#define b_rows 3
-#define cell_width 50
-#define cell_height 42
+
 //determine battlefield cell positions
-static const uint16_t b_x[b_cols] = {10, 52, 94, 136, 178};
-static const uint16_t b_y[b_rows] = {90, 140, 190};
+const uint16_t b_x[b_cols] = {10, 52, 94, 136, 178};
+const uint16_t b_y[b_rows] = {90, 140, 190};
 static uint32_t bomb_planted_time[b_rows][b_cols];
 static int8_t sel_col = -1;
 static int8_t sel_row = -1;
 static bool shovel_mod = false;
-
+uint16_t plant_health[b_rows][b_cols];
 //FSM for plant selection
 typedef enum {
     select_none,
@@ -75,16 +72,8 @@ typedef enum {
     select_bomb,
     select_doomshroom
 }PlantSelection_t;
-//FSM for planting plants on battlefield
-typedef enum{
-    plant_none,
-    plant_wallnut,
-    plant_shooter,
-    plant_bomb,
-    plant_doomshroom
-}Planting_t;
 static PlantSelection_t current_selection = select_none;
-static Planting_t battle_grid[b_rows][b_cols];
+Planting_t battle_grid[b_rows][b_cols];
 //FSM for wallnut charge
 typedef enum {
     WALNUT_IDLE,          
@@ -115,6 +104,65 @@ typedef enum {
 static BombState bomb_state = BOMB_IDLE;
 static uint32_t bomb_timer_start = 0;
 static uint8_t bomb_steps = 0;
+//bomb explosion logic
+static void Explode(int row, int col){
+   
+    for(int i=0; i<MAX_ZOMBIES; i++){
+        if(zombie_instances[i].is_alive && zombie_instances[i].row == row){
+            int z_col = (zombie_instances[i].x - b_x[0]) / cell_width;
+            if(z_col == col){
+                zombie_instances[i].is_alive = false;
+                Score_Add(zombie_status[zombie_instances[i].type].score);
+            }
+        }
+    }
+
+    int adjacent_dirs[4][2] = {{-1,0}, {1,0}, {0,-1}, {0,1}};
+    for(int d=0; d<4; d++){
+        int new_row = row + adjacent_dirs[d][0];
+        int new_col = col + adjacent_dirs[d][1];
+        if (new_row >= 0 && new_row < b_rows && new_col >= 0 && new_col < b_cols) {
+            for (int i = 0; i < MAX_ZOMBIES; i++) {
+                if (zombie_instances[i].is_alive && zombie_instances[i].row == new_row) {
+                    int z_col = (zombie_instances[i].x - b_x[0]) / cell_width;
+                    if (z_col == new_col) {
+                        zombie_instances[i].health /= 2; // 50% damage
+                        if (zombie_instances[i].health <= 0) {
+                            zombie_instances[i].is_alive = false;
+                            Score_Add(zombie_status[zombie_instances[i].type].score);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+   
+    int diagonal_dirs[4][2] = {{-1,-1}, {-1,1}, {1,-1}, {1,1}};
+    for(int d=0; d<4; d++){
+        int new_row = row + diagonal_dirs[d][0];
+        int new_col = col + diagonal_dirs[d][1];
+        if (new_row >= 0 && new_row < b_rows && new_col >= 0 && new_col < b_cols) {
+            for (int i = 0; i < MAX_ZOMBIES; i++) {
+                if (zombie_instances[i].is_alive && zombie_instances[i].row == new_row) {
+                    int z_col = (zombie_instances[i].x - b_x[0]) / cell_width;
+                    if (z_col == new_col) {
+                        zombie_instances[i].health -= zombie_instances[i].health / 4; // 25% damage
+                        if (zombie_instances[i].health <= 0) {
+                            zombie_instances[i].is_alive = false;
+                            Score_Add(zombie_status[zombie_instances[i].type].score);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
 //FSM for doomshroom 
 typedef enum {
     DOOMSHROOM_INACTIVE,   
@@ -140,17 +188,6 @@ static uint32_t shooter_last_charge_time = 0;
 static uint32_t bomb_last_charge_time = 0;
 static uint32_t doomshroom_last_charge_time = 0;
 
-
-
-//FSM for zombies
-typedef enum {
-zombie_moving,
-zombie_attack,
-zombie_died,
-zombie_win
-}zombiestatus_t;
-
-
 #define INPUT_DELAY_MS 200
 bool Is_nuclaunched(void){
     return nuclaunch;// if true return to main menu
@@ -169,10 +206,20 @@ for(int row=0;row<b_rows;row++){
     for(int col=0;col<b_cols;col++){
         battle_grid[row][col] = plant_none;
         bomb_planted_time[row][col]=0;
+        plant_health[row][col]=0;
     }
 }
+Zombie_Init();
 }
 void Engine_Update(void){
+static uint32_t last_damage_time=0;
+static uint32_t last_frame_time=0;
+uint32_t now=HAL_GetTick();
+
+uint32_t delta =now-last_frame_time;
+if(delta>=100)delta=100;
+last_frame_time=now;
+
     Joystick_Read(&joystick_cfg2, &joystick_data2);
 if (current_input.btn3_pressed) {
      if (cursor_x >= shovel_select_x && cursor_x <= shovel_select_x + shovel_select_width &&
@@ -195,11 +242,11 @@ else{
                cursor_y >= shooter_select_y && cursor_y <= shooter_select_y + shooter_select_height) {
             current_selection = select_shooter;
     } else if (cursor_x >= bomb_select_x && cursor_x <= bomb_select_x + bomb_select_width &&
-               cursor_y >= bomb_select_y && cursor_y <= bomb_select_y + bomb_select_height) {
+               cursor_y >= bomb_select_y && cursor_y <= bomb_select_y + bomb_select_height && Score_Get() >= 600) {
             current_selection = select_bomb;
     } else if (cursor_x >= doomshroom_select_x && cursor_x <= doomshroom_select_x + doomshroom_select_width &&
                cursor_y >= doomshroom_select_y && cursor_y <= doomshroom_select_y + doomshroom_select_height &&
-							 doomshroom_state == DOOMSHROOM_READY) { 
+							 doomshroom_state == DOOMSHROOM_READY && Score_Get() >= 2500) { 
             current_selection = select_doomshroom;
     }
 }
@@ -210,17 +257,21 @@ if (current_input.btn2_pressed && shovel_mod) {
         battle_grid[sel_row][sel_col] = plant_none;   
         switch (remove_plant) {
             case plant_wallnut:
-                walnut_state = WALNUT_IDLE;
+                //walnut_state = WALNUT_IDLE;
                 break;
             case plant_shooter:
-                shooter_state = SHOOTER_IDLE;
+                //shooter_state = SHOOTER_IDLE;
                 break;
             case plant_bomb:
-                bomb_state = BOMB_IDLE;
+                //bomb_state = BOMB_IDLE;
                 break;
             case plant_doomshroom:
                 doomshroom_state = DOOMSHROOM_INACTIVE;
                 doomshroom_timer_start = HAL_GetTick();
+                break;
+            case plant_none:
+            case plant_bomb_exploded:
+                // Do nothing for these cases
                 break;
         }
         shovel_mod = false;                          
@@ -233,6 +284,7 @@ switch (current_selection) {
         battle_grid[sel_row][sel_col] == plant_none &&
         walnut_state == WALNUT_IDLE) {  
         battle_grid[sel_row][sel_col] = plant_wallnut;
+        plant_health[sel_row][sel_col]=600;
         current_selection = select_none;
         walnut_state = WALNUT_CHARGING;
         wallnut_timer_start = HAL_GetTick();
@@ -243,6 +295,7 @@ switch (current_selection) {
         battle_grid[sel_row][sel_col] == plant_none &&
         shooter_state == SHOOTER_IDLE) {  
         battle_grid[sel_row][sel_col] = plant_shooter;
+        plant_health[sel_row][sel_col]=125;
         current_selection = select_none;
         shooter_state = SHOOTER_CHARGING;
         shooter_timer_start = HAL_GetTick();
@@ -264,6 +317,7 @@ switch (current_selection) {
         if (current_input.btn2_pressed && sel_col != -1 && sel_row != -1 &&
         battle_grid[sel_row][sel_col] == plant_none) {  
         battle_grid[sel_row][sel_col] = plant_doomshroom;
+        plant_health[sel_row][sel_col]=1;
         nuclaunch=true; 
         doomshroom_state = DOOMSHROOM_PLANTED; 
 				current_selection = select_none; 
@@ -274,6 +328,13 @@ switch (current_selection) {
         break;
 }
 }
+Zombie_Update(delta);
+if(now-last_damage_time>=1000){
+last_damage_time=now;
+Damage_Determination();
+}
+
+
 //press btn9 to charge only one plant to avoid bugs
 if(current_input.btn9_pressed){
    if(shooter_state == SHOOTER_READY){
@@ -357,7 +418,7 @@ switch (shooter_state) {
 
 switch (bomb_state) {
     case BOMB_CHARGING:
-        if ((HAL_GetTick() - bomb_timer_start) >= 25000) {
+        if ((HAL_GetTick() - bomb_timer_start) >= 15000) {
             bomb_state = BOMB_READY;
         }
         break;
@@ -386,7 +447,7 @@ switch (bomb_state) {
 switch (doomshroom_state) {
     case DOOMSHROOM_INACTIVE:
         
-        if (HAL_GetTick() - doomshroom_timer_start >= 10000) {
+        if (HAL_GetTick() - doomshroom_timer_start >= 120000) {
             doomshroom_state = DOOMSHROOM_CHARGEABLE;
         }
         break;
@@ -421,7 +482,13 @@ switch (doomshroom_state) {
 for (int row = 0; row < b_rows; row++) {
     for (int col = 0; col < b_cols; col++) {
         if (battle_grid[row][col] == plant_bomb && bomb_planted_time[row][col] != 0) {
-            if (HAL_GetTick() - bomb_planted_time[row][col] > 1500 + 200) { 
+            if (HAL_GetTick() - bomb_planted_time[row][col] > 1500) { 
+                Explode(row, col);
+                battle_grid[row][col] = plant_bomb_exploded;
+                bomb_planted_time[row][col] = HAL_GetTick(); // Reset timer for removal animation
+            }
+        } else if (battle_grid[row][col] == plant_bomb_exploded) {
+            if (HAL_GetTick() - bomb_planted_time[row][col] > 200) {
                 battle_grid[row][col] = plant_none;
                 bomb_planted_time[row][col] = 0;
             }
@@ -459,6 +526,11 @@ if(perv_sel_col!=-1){
 //test for draw background sprite
 void Engine_Render(void){
  LCD_Fill_Buffer(0);
+
+char score_str[20];
+sprintf(score_str, "Score: %d", Score_Get());
+LCD_printString(score_str,0,0,1,1);
+
 //background for select plants
 
 LCD_Draw_Sprite(77, 10, 50, 51, (const uint8_t*)TEST_select_walnut);
@@ -554,11 +626,10 @@ for (int row = 0; row < b_rows; row++) {
                     sprite = (const uint8_t*)TEST_shooter;
                     break;
                 case plant_bomb:
-                   if (bomb_planted_time[row][col] != 0 && HAL_GetTick() - bomb_planted_time[row][col] > 1500) {
-                        sprite = (const uint8_t*) TEST_BOMB_FRAMES[1];
-                    } else {
-                        sprite = (const uint8_t*) TEST_BOMB_FRAMES[0];
-                    }
+                    sprite = (const uint8_t*) TEST_BOMB_FRAMES[0];
+                    break;
+                case plant_bomb_exploded:
+                    sprite = (const uint8_t*) TEST_BOMB_FRAMES[1];
                     break;
                 case plant_doomshroom:
                     sprite = (const uint8_t*)TEST_doomshroom;
@@ -573,8 +644,9 @@ for (int row = 0; row < b_rows; row++) {
             } 
             break;
             }
-            LCD_Draw_Sprite(b_x[col], b_y[row], cell_width, cell_height, sprite);
+            LCD_Draw_Sprite(b_x[col], b_y[row], cell_height, cell_width, sprite);
         
     }
 }
+Zombie_Render();
 }

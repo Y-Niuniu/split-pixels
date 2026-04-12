@@ -10,7 +10,7 @@ typedef enum{
     shooter,
     bomb,
     doomshroom,
-    count//represent the number of plant type
+    PLANT_TYPE_COUNT//represent the number of plant type
 }PlantType_t;
 
 //static plant status
@@ -23,6 +23,6 @@ int attack_interval;
 const uint8_t *sprite;
 }Plantstatus_t;
 
-extern const Plantstatus_t plant_status[count];
+extern const Plantstatus_t plant_status[PLANT_TYPE_COUNT];
 
 #endif

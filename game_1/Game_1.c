@@ -4,6 +4,7 @@
 #include "LCD.h"
 #include "PWM.h"
 #include "Buzzer.h"
+#include "engine/interact.h"
 #include "stm32l4xx_hal.h"
 #include <stdio.h>
 #include "Joystick.h"
@@ -12,6 +13,7 @@
 #include "shared/selector.h"
 #include "sprites/bullet_background.h"
 #include"engine/engine.h"
+bool IsGameOver(void);
 extern ST7789V2_cfg_t cfg0;
 extern PWM_cfg_t pwm_cfg;
 extern Buzzer_cfg_t buzzer_cfg;
@@ -47,10 +49,6 @@ static uint32_t doomshroom_timer_start = 0;
 
 #define GAME1_FRAME_TIME_MS 30
 
-static bool IsJoystickCentered(float threshold) {
-    return (fabsf(joystick_data.coord_mapped.x) < threshold &&
-            fabsf(joystick_data.coord_mapped.y) < threshold);
-}
 
 void Game1_Init(void) {
    
@@ -161,6 +159,22 @@ static bool Game1_Update(void) {
             
             break;
     }
+   if(IsVictory()){
+    LCD_Fill_Buffer(1);
+    LCD_printString("VICTORY!", 80, 100, 0, 3);
+    LCD_Refresh(&cfg0);
+    HAL_Delay(3000);
+    return false;
+   }
+   if(IsGameOver()){
+    LCD_Fill_Buffer(1);
+    LCD_printString("GAME OVER", 60, 100, 0, 3);
+    LCD_Refresh(&cfg0);
+    HAL_Delay(3000);
+    return false;
+   }
+
+
     return true;
 }
 
