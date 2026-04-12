@@ -168,7 +168,7 @@ static bool Game1_Update(void) {
    }
    if(IsGameOver()){
     LCD_Fill_Buffer(1);
-    LCD_printString("GAME OVER", 60, 100, 0, 3);
+    LCD_printString("Zombie eat your brain", 60, 100, 0, 3);
     LCD_Refresh(&cfg0);
     HAL_Delay(3000);
     return false;
