@@ -42,7 +42,7 @@ static Game1State_t current_state = RUNNING;
 int16_t cursor_x = 120;   
 int16_t cursor_y = 120;
 uint32_t last_move_tick = 0;
-#define CURSOR_STEP 8          
+#define CURSOR_STEP 15         
 #define MOVE_DELAY_MS 30        
 
 static uint32_t doomshroom_timer_start = 0;
@@ -168,7 +168,8 @@ static bool Game1_Update(void) {
    }
    if(IsGameOver()){
     LCD_Fill_Buffer(1);
-    LCD_printString("Zombie eat your brain", 60, 100, 0, 3);
+    LCD_printString("Zombie eat ", 15, 100, 0, 3);
+    LCD_printString("your brain!!", 15, 140, 0, 3);
     LCD_Refresh(&cfg0);
     HAL_Delay(3000);
     return false;
@@ -191,7 +192,7 @@ static void Game1_Render(void) {
         return;
     }
   
-    LCD_Draw_Rect(cursor_x-2, cursor_y-2, 4, 4, 1, 1);
+    LCD_Draw_Rect(cursor_x-2, cursor_y-2, 10, 10, 2, 1);
     
     if (current_state == PAUSED) {
         LCD_printString("PAUSED", 70, 120, 1, 3);

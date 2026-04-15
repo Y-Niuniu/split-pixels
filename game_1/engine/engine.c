@@ -360,7 +360,7 @@ if(current_input.btn9_pressed){
 
 switch (walnut_state) {
     case WALNUT_CHARGING:
-        if ((HAL_GetTick() - wallnut_timer_start) >= 10000) {
+        if ((HAL_GetTick() - wallnut_timer_start) >= 8000) {
             walnut_state = WALNUT_READY;
         }
         break;
@@ -388,7 +388,7 @@ switch (walnut_state) {
 }
 switch (shooter_state) {
     case SHOOTER_CHARGING:
-        if ((HAL_GetTick() - shooter_timer_start) >= 6500) {
+        if ((HAL_GetTick() - shooter_timer_start) >= 5700) {
             shooter_state = SHOOTER_READY;
         }
         break;
@@ -418,7 +418,7 @@ switch (shooter_state) {
 
 switch (bomb_state) {
     case BOMB_CHARGING:
-        if ((HAL_GetTick() - bomb_timer_start) >= 15000) {
+        if ((HAL_GetTick() - bomb_timer_start) >= 12000) {
             bomb_state = BOMB_READY;
         }
         break;
