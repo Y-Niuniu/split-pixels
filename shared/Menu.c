@@ -6,12 +6,12 @@
 #include <stdio.h>
 #include"game_1.h"
 #include <stdbool.h>
-extern ST7789V2_cfg_t cfg0;  // LCD configuration from main.c
-extern Joystick_cfg_t joystick_cfg;  // Joystick configuration
-extern Joystick_t joystick_data;     // Current joystick readings
-extern Joystick_cfg_t joystick_cfg2;  // Second joystick configuration
-extern Joystick_t joystick_data2;     // Second joystick readings
-extern InputState current_input;      // Current input state
+extern ST7789V2_cfg_t cfg0;  
+extern Joystick_cfg_t joystick_cfg;  
+extern Joystick_t joystick_data;     
+extern Joystick_cfg_t joystick_cfg2;  
+extern Joystick_t joystick_data2;     
+extern InputState current_input;      
 
 static const char* background_story[]={
 
@@ -45,10 +45,10 @@ static const char* background_story[]={
 
 static int p1_selection=0;
 static int p2_selection=0;
-static uint32_t title_start_time = 0;  // For title display timer
-static bool title_finished = false;    // Whether title phase is finished
+static uint32_t title_start_time = 0;  
+static bool title_finished = false;    
 
-// Menu options
+
 static const char* menu_options[] = {
     "Game 1",
     "Game 2", 
@@ -129,10 +129,10 @@ void Menu_Init(MenuSystem* menu) {
 
 MenuState Menu_Run(MenuSystem* menu) {
     static Direction p1_last_direction = CENTRE;
-    static Direction p2_last_direction = CENTRE;  // Track last direction for debouncing
-    static int16_t line_offset = 0;  // For scrolling background story
+    static Direction p2_last_direction = CENTRE; 
+    static int16_t line_offset = 0;  
     static bool story_finished = false;
-    MenuState selected_game = MENU_STATE_HOME;  // Which game was selected
+    MenuState selected_game = MENU_STATE_HOME;  
     
     // Initialize for this run
     title_finished = false;
@@ -169,30 +169,29 @@ MenuState Menu_Run(MenuSystem* menu) {
                 story_finished = true;
             }
             
-            // Render story
+        
             render_story(line_offset);
 
-            // Update line offset for scrolling
-            line_offset -= 1;  // Scroll up slowly
+            
+            line_offset -= 1;  
             if (line_offset < -TEXT_HEIGHT) {
-                story_finished = true;  // Story finished scrolling
+                story_finished = true;  
             }
         } else {
-            // Menu phase: navigation and selection
-            // Handle joystick navigation (up/down to select option)
+           
             Direction p1_current_direction = joystick_data.direction;
             
-            if (p1_current_direction == S && p1_last_direction != S) {  // Joystick pushed DOWN
+            if (p1_current_direction == S && p1_last_direction != S) { 
                 // Move selection down
                 p1_selection++;
                 if (p1_selection >= NUM_MENU_OPTIONS) {
                     p1_selection = 0;  // Wrap around
                 }
             } 
-            else if (p1_current_direction == N && p1_last_direction != N) {  // Joystick pushed UP
-                // Move selection up
+            else if (p1_current_direction == N && p1_last_direction != N) { 
+                
                 if (p1_selection == 0) {
-                    p1_selection = NUM_MENU_OPTIONS - 1;  // Wrap around
+                    p1_selection = NUM_MENU_OPTIONS - 1; 
                 } else {
                     p1_selection--;
                 }
@@ -201,17 +200,17 @@ MenuState Menu_Run(MenuSystem* menu) {
             p1_last_direction = p1_current_direction;
             Direction p2_current_direction = joystick_data2.direction;
             
-            if (p2_current_direction == S && p2_last_direction != S) {  // Joystick pushed DOWN
-                // Move selection down
+            if (p2_current_direction == S && p2_last_direction != S) { 
+          
                 p2_selection++;
                 if (p2_selection >= NUM_MENU_OPTIONS) {
-                    p2_selection = 0;  // Wrap around
+                    p2_selection = 0; 
                 }
             } 
-            else if (p2_current_direction == N && p2_last_direction != N) {  // Joystick pushed UP
-                // Move selection up
+            else if (p2_current_direction == N && p2_last_direction != N) {  
+               
                 if (p2_selection == 0) {
-                    p2_selection = NUM_MENU_OPTIONS - 1;  // Wrap around
+                    p2_selection = NUM_MENU_OPTIONS - 1; 
                 } else {
                     p2_selection--;
                 }
@@ -219,9 +218,8 @@ MenuState Menu_Run(MenuSystem* menu) {
             
             p2_last_direction = p2_current_direction;
             
-            // Handle button press to select current option
+        
             if ((p1_selection == p2_selection) && (current_input.btn3_pressed) && (current_input.btn9_pressed)) {
-                // User pressed button - select the highlighted option
                 if (p1_selection == 0) {
                     selected_game = MENU_STATE_GAME_1;
                 } else if (p1_selection == 1) {
@@ -229,7 +227,7 @@ MenuState Menu_Run(MenuSystem* menu) {
                 } else if (p1_selection == 2) {
                     selected_game = MENU_STATE_GAME_3;
                 }
-                break;  // Exit menu loop - game selected!
+                break; 
             }
             
             // Render menu

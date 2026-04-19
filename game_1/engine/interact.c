@@ -20,7 +20,7 @@ static int game_score = 0;
 static bool game_victory = false;
 static bool game_over = false;
 
-// Wave generation state machine
+// FMS for Wave generation
 typedef enum {
     WAVE_IDLE,
     WAVE_SPAWNING_ROW_0,
@@ -87,7 +87,7 @@ for(int i=0;i<MAX_ZOMBIES;i++){
         }
     }
 }
-// if more than 3min you defence secceed then win
+
 uint32_t now = HAL_GetTick();
 uint32_t passed_time=(now-game_start_time)/1000;
 if(passed_time>=180&&!game_victory){
@@ -96,14 +96,12 @@ if(passed_time>=180&&!game_victory){
 }
 if(game_victory)return;
 
-// --- FSM-based Wave Generation Logic ---
 
-// 1. Start a new wave if the state machine is idle
+
+//  Start a new wave if the state machine is idle
 if (wave_state == WAVE_IDLE && now - last_generate_time >= next_generate_time) {
     last_generate_time = now;
     next_generate_time = 20000 + (rand() % 5000); // Time until NEXT wave starts
-
-    // Set up parameters for the entire wave
     if (passed_time < 60) {
         wave_zombies_per_row = 1 + (rand() % 2);
         wave_bucket_chance = 0;
@@ -115,12 +113,12 @@ if (wave_state == WAVE_IDLE && now - last_generate_time >= next_generate_time) {
         wave_bucket_chance = 60;
     }
 
-    // Transition to the first spawning state
+  
     wave_state = WAVE_SPAWNING_ROW_0;
-    wave_spawn_delay_timer = now; // Spawn first row immediately
+    wave_spawn_delay_timer = now; // Spawn first row
 }
 
-// 2. Process the currently active wave state
+// Process the currently active wave state
 if (wave_state != WAVE_IDLE && now >= wave_spawn_delay_timer) {
     int row_to_spawn = -1;
     WaveState_t next_state = WAVE_IDLE;
@@ -138,7 +136,7 @@ if (wave_state != WAVE_IDLE && now >= wave_spawn_delay_timer) {
             row_to_spawn = 2;
             next_state = WAVE_IDLE; // End of wave
             break;
-        case WAVE_IDLE: // Should not happen here
+        case WAVE_IDLE:
         default:
             break;
     }
@@ -219,9 +217,7 @@ for(int i=0;i<MAX_ZOMBIES;i++){
     int col = -1;
     bool plant_in_front = false;
 
-    // Check for a plant in the same cell or slightly ahead
     for(int c=0; c<5; c++){
-        // A zombie is considered to be "at" a plant if its front is within the plant's cell
         if (zombie_instances[i].x >= b_x[c] && zombie_instances[i].x < b_x[c] + cell_width) {
             if (battle_grid[row][c] != plant_none) {
                 col = c;
@@ -232,18 +228,16 @@ for(int i=0;i<MAX_ZOMBIES;i++){
     }
 
     if(plant_in_front){
-        // There is a plant, so the zombie should be attacking
         zombie_instances[i].is_attacking = true;
         int damage = zombie_status[zombie_instances[i].type].DPS;
         plant_health[row][col] -= damage;
         if(plant_health[row][col] <= 0){
             battle_grid[row][col] = plant_none;
             plant_health[row][col] = 0;
-            // Plant is gone, zombie can move again
+            //If plant is gone, zombie can move again
             zombie_instances[i].is_attacking = false; 
         }
     } else {
-        // No plant in front, zombie should be moving
         zombie_instances[i].is_attacking = false;
     }
 }

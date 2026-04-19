@@ -257,13 +257,13 @@ if (current_input.btn2_pressed && shovel_mod) {
         battle_grid[sel_row][sel_col] = plant_none;   
         switch (remove_plant) {
             case plant_wallnut:
-                //walnut_state = WALNUT_IDLE;
+      
                 break;
             case plant_shooter:
-                //shooter_state = SHOOTER_IDLE;
+         
                 break;
             case plant_bomb:
-                //bomb_state = BOMB_IDLE;
+          
                 break;
             case plant_doomshroom:
                 doomshroom_state = DOOMSHROOM_INACTIVE;
@@ -271,7 +271,6 @@ if (current_input.btn2_pressed && shovel_mod) {
                 break;
             case plant_none:
             case plant_bomb_exploded:
-                // Do nothing for these cases
                 break;
         }
         shovel_mod = false;                          
@@ -511,16 +510,7 @@ if (current_selection != select_none||shovel_mod) {
         if (sel_col != -1) break;
     }
 }
-/*if(sel_col!=perv_sel_col||sel_row!=perv_sel_row){
-if(perv_sel_col!=-1){
-    LCD_Draw_Sprite(b_x[perv_sel_col], b_y[perv_sel_row], cell_width, cell_height, (const uint8_t*)TEST_GRASS_FRAME0);
- }
- if(sel_col!=-1){
-     LCD_Draw_Sprite(b_x[sel_col], b_y[sel_row], cell_width, cell_height, (const uint8_t*)TEST_GRASS_FRAME1);
- }
- perv_sel_col = sel_col;
- perv_sel_row = sel_row;
- }*/
+
 }
 
 //test for draw background sprite
