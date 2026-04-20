@@ -12,28 +12,35 @@ void Spaceship_Init(Spaceship_t* ship, float start_x, float start_y, float speed
     ship->dy = 0.0f;
     ship->speed = speed;
     ship->radius = radius;
+    ship->active = 1;  // spaceship is active
 }
 
 // Update spaceship position and handle wall collisions
 void Spaceship_Update(Spaceship_t* ship, uint16_t screen_width, uint16_t screen_height) {
+    if (!ship->active) return;  // do nothing if not active
+
     // Move spaceship
     // Moving straight in the direction of (dx, dy) with the given speed
     ship->x += ship->dx * ship->speed;
     ship->y += ship->dy * ship->speed;
 
-    // Check wall collisions and bounce
-    if (ship->x - ship->radius < 0 || ship->x + ship->radius > screen_width) {
-        ship->dx = -ship->dx;
-        ship->x = ship->x < ship->radius ? ship->radius : screen_width - ship->radius;
+    // Check wall collisions and clamp position
+    if (ship->x - ship->radius < 0) {
+        ship->x = ship->radius;
+    } else if (ship->x + ship->radius > screen_width) {
+        ship->x = screen_width - ship->radius;
     }
-    if (ship->y - ship->radius < 0 || ship->y + ship->radius > screen_height) {
-        ship->dy = -ship->dy;
-        ship->y = ship->y < ship->radius ? ship->radius : screen_height - ship->radius;
+    if (ship->y - ship->radius < 0) {
+        ship->y = ship->radius;
+    } else if (ship->y + ship->radius > screen_height) {
+        ship->y = screen_height - ship->radius;
     }
 }
 
 // Draw spaceship on screen
 void Spaceship_Draw(Spaceship_t* ship) {
+    if (!ship->active) return;  // do not draw if not active
+
     // Calculate triangle points based on position and direction
     // Nose (front point)
     int16_t nose_x = (int16_t)(ship->x + ship->dx * ship->radius);
@@ -53,14 +60,14 @@ void Spaceship_Draw(Spaceship_t* ship) {
     LCD_Draw_Line(right_x, right_y, nose_x, nose_y, LCD_COLOUR_2); // Right wing to nose
 }
 
-// Change direction (rotate by 45 degrees clockwise)
+// Change direction (rotate by 12 degrees clockwise)
 void Spaceship_ChangeDirection(Spaceship_t* ship) {
-    const float cos45 = 0.707106781f;  // cos(45)
-    const float sin45 = 0.707106781f;  // sin(45)
+    const float cos12 = 0.9781476007f;  // cos(12°)
+    const float sin12 = 0.2079116908f;  // sin(12°)
     
-    // Rotate vector by 45° clockwise
-    float new_dx = ship->dx * cos45 + ship->dy * sin45;
-    float new_dy = -ship->dx * sin45 + ship->dy * cos45;
+    // Rotate vector by 12° clockwise
+    float new_dx = ship->dx * cos12 + ship->dy * sin12;
+    float new_dy = -ship->dx * sin12 + ship->dy * cos12;
     
     // Normalize the vector to maintain speed
     float length = sqrtf(new_dx * new_dx + new_dy * new_dy);
@@ -68,4 +75,9 @@ void Spaceship_ChangeDirection(Spaceship_t* ship) {
         ship->dx = new_dx / length;
         ship->dy = new_dy / length;
     }
+}
+
+// Deactivate spaceship
+void Spaceship_Deactivate(Spaceship_t* ship) {
+    ship->active = 0;
 }

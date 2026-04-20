@@ -36,9 +36,9 @@ MenuState Game3_Run(void) {
     
     // Display instructions
     LCD_Fill_Buffer(0);
-    LCD_printString("Press BTN2", 70, 30, 1, 2);
-    LCD_printString("to change", 80, 60, 1, 2);
-    LCD_printString("direction!", 75, 85, 1, 2);
+    LCD_printString("Press and hold BTN2 and BTN6", 50, 30, 1, 2);
+    LCD_printString("to change", 50, 60, 1, 2);
+    LCD_printString("direction and shoot!", 50, 85, 1, 2);
     LCD_Refresh(&cfg0);
     HAL_Delay(2000);
 

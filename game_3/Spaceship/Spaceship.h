@@ -9,6 +9,7 @@ typedef struct {
     float dx, dy;      // direction vector (normalized)
     float speed;       // movement speed
     uint8_t radius;    // drawing radius
+    uint8_t active;    // is spaceship active
 } Spaceship_t;
 
 // Initialize spaceship
@@ -22,5 +23,8 @@ void Spaceship_Draw(Spaceship_t* ship);
 
 // Change direction (rotate by 90 degrees)
 void Spaceship_ChangeDirection(Spaceship_t* ship);
+
+// Deactivate spaceship
+void Spaceship_Deactivate(Spaceship_t* ship);
 
 #endif // SPACESHIP_H
