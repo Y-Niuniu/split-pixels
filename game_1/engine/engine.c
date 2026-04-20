@@ -257,13 +257,13 @@ if (current_input.btn2_pressed && shovel_mod) {
         battle_grid[sel_row][sel_col] = plant_none;   
         switch (remove_plant) {
             case plant_wallnut:
-                //walnut_state = WALNUT_IDLE;
+      
                 break;
             case plant_shooter:
-                //shooter_state = SHOOTER_IDLE;
+         
                 break;
             case plant_bomb:
-                //bomb_state = BOMB_IDLE;
+          
                 break;
             case plant_doomshroom:
                 doomshroom_state = DOOMSHROOM_INACTIVE;
@@ -271,7 +271,6 @@ if (current_input.btn2_pressed && shovel_mod) {
                 break;
             case plant_none:
             case plant_bomb_exploded:
-                // Do nothing for these cases
                 break;
         }
         shovel_mod = false;                          
@@ -360,7 +359,7 @@ if(current_input.btn9_pressed){
 
 switch (walnut_state) {
     case WALNUT_CHARGING:
-        if ((HAL_GetTick() - wallnut_timer_start) >= 10000) {
+        if ((HAL_GetTick() - wallnut_timer_start) >= 8000) {
             walnut_state = WALNUT_READY;
         }
         break;
@@ -388,7 +387,7 @@ switch (walnut_state) {
 }
 switch (shooter_state) {
     case SHOOTER_CHARGING:
-        if ((HAL_GetTick() - shooter_timer_start) >= 6500) {
+        if ((HAL_GetTick() - shooter_timer_start) >= 5700) {
             shooter_state = SHOOTER_READY;
         }
         break;
@@ -418,7 +417,7 @@ switch (shooter_state) {
 
 switch (bomb_state) {
     case BOMB_CHARGING:
-        if ((HAL_GetTick() - bomb_timer_start) >= 15000) {
+        if ((HAL_GetTick() - bomb_timer_start) >= 12000) {
             bomb_state = BOMB_READY;
         }
         break;
@@ -511,16 +510,7 @@ if (current_selection != select_none||shovel_mod) {
         if (sel_col != -1) break;
     }
 }
-/*if(sel_col!=perv_sel_col||sel_row!=perv_sel_row){
-if(perv_sel_col!=-1){
-    LCD_Draw_Sprite(b_x[perv_sel_col], b_y[perv_sel_row], cell_width, cell_height, (const uint8_t*)TEST_GRASS_FRAME0);
- }
- if(sel_col!=-1){
-     LCD_Draw_Sprite(b_x[sel_col], b_y[sel_row], cell_width, cell_height, (const uint8_t*)TEST_GRASS_FRAME1);
- }
- perv_sel_col = sel_col;
- perv_sel_row = sel_row;
- }*/
+
 }
 
 //test for draw background sprite
