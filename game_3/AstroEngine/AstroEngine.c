@@ -12,7 +12,7 @@ static uint8_t button7_pressed = 0;
 void AstroEngine_Init(AstroEngine_t* engine, uint16_t width, uint16_t height) {
     engine->screen_width = width;
     engine->screen_height = height;
-    Spaceship_Init(&engine->spaceship, 15.0f, 15.0f, 4.0f, 15);  // NW
+    Spaceship_Init(&engine->spaceship, 16.0f, 16.0f, 4.0f, 16);  // NW
     Spaceship_Init(&engine->spaceship2, width - 15.0f, height - 15.0f, 4.0f, 15);  // SE
     for (int i = 0; i < MAX_BULLETS; i++) {
         engine->bullets[i].active = 0;
