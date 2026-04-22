@@ -1,6 +1,7 @@
 #include "Spaceship.h"
 #include "LCD.h"
 #include <math.h>
+#include "Sprite/SpaceshipSprite.h"
 
 // Initialize spaceship
 void Spaceship_Init(Spaceship_t* ship, float start_x, float start_y, float speed, uint8_t radius) {
@@ -40,24 +41,33 @@ void Spaceship_Update(Spaceship_t* ship, uint16_t screen_width, uint16_t screen_
 // Draw spaceship on screen
 void Spaceship_Draw(Spaceship_t* ship) {
     if (!ship->active) return;  // do not draw if not active
+    int16_t x0 = (int16_t)(ship->x - 16.0f);
+    int16_t y0 = (int16_t)(ship->y - 16.0f);
 
-    // Calculate triangle points based on position and direction
-    // Nose (front point)
-    int16_t nose_x = (int16_t)(ship->x + ship->dx * ship->radius);
-    int16_t nose_y = (int16_t)(ship->y + ship->dy * ship->radius);
+    LCD_Draw_Sprite(
+        x0,
+        y0,
+        32,
+        32,
+        (const uint8_t *)TEST_SPACESHIP
+    );
+    // // Calculate triangle points based on position and direction
+    // // Nose (front point)
+    // int16_t nose_x = (int16_t)(ship->x + ship->dx * ship->radius);
+    // int16_t nose_y = (int16_t)(ship->y + ship->dy * ship->radius);
     
-    // Left wing (smaller radius and perpendicular to direction)
-    int16_t left_x = (int16_t)(ship->x - ship->dy * ship->radius * 0.7f);
-    int16_t left_y = (int16_t)(ship->y + ship->dx * ship->radius * 0.7f);
+    // // Left wing (smaller radius and perpendicular to direction)
+    // int16_t left_x = (int16_t)(ship->x - ship->dy * ship->radius * 0.7f);
+    // int16_t left_y = (int16_t)(ship->y + ship->dx * ship->radius * 0.7f);
     
-    // Right wing (smaller radius and perpendicular to direction)
-    int16_t right_x = (int16_t)(ship->x + ship->dy * ship->radius * 0.7f);
-    int16_t right_y = (int16_t)(ship->y - ship->dx * ship->radius * 0.7f);
+    // // Right wing (smaller radius and perpendicular to direction)
+    // int16_t right_x = (int16_t)(ship->x + ship->dy * ship->radius * 0.7f);
+    // int16_t right_y = (int16_t)(ship->y - ship->dx * ship->radius * 0.7f);
     
-    // Draw the three sides of the triangle in red
-    LCD_Draw_Line(nose_x, nose_y, left_x, left_y, LCD_COLOUR_2);   // Nose to left wing
-    LCD_Draw_Line(left_x, left_y, right_x, right_y, LCD_COLOUR_2); // Left wing to right wing
-    LCD_Draw_Line(right_x, right_y, nose_x, nose_y, LCD_COLOUR_2); // Right wing to nose
+    // // Draw the three sides of the triangle in red
+    // LCD_Draw_Line(nose_x, nose_y, left_x, left_y, LCD_COLOUR_2);   // Nose to left wing
+    // LCD_Draw_Line(left_x, left_y, right_x, right_y, LCD_COLOUR_2); // Left wing to right wing
+    // LCD_Draw_Line(right_x, right_y, nose_x, nose_y, LCD_COLOUR_2); // Right wing to nose
 }
 
 // Change direction (rotate by 12 degrees clockwise)

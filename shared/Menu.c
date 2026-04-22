@@ -242,3 +242,14 @@ MenuState Menu_Run(MenuSystem* menu) {
     
     return selected_game;  // Return which game was selected
 }
+////test only game 3
+//#include "Menu.h"
+
+// void Menu_Init(MenuSystem* menu) {
+//     menu->selected_option = 2;   // Game 3
+// }
+
+// MenuState Menu_Run(MenuSystem* menu) {
+//     (void)menu;
+//     return MENU_STATE_GAME_3;
+// }
