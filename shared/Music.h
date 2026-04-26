@@ -8,7 +8,7 @@
 
 extern Buzzer_cfg_t buzzer_cfg;
 
-void playNote(int note, int duration)；
+void playNote(int note, int duration);
 void startMelody(int melody[], int durations[], int length, int bpm);
 void updateMusic(void);
 void stopMusic(void);
