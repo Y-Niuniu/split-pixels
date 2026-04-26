@@ -9,6 +9,15 @@ Buzzer_cfg_t buzzer_cfg = {
     .setup_done = 0
 };
 
+static int current_melody[];
+static int current_durations[];
+static int current_length = 0;
+static int current_index = 0;
+static int wholenote = 0;
+static uint32_t note_start_time = 0;
+static int is_playing_melody = 0;
+static int current_note_duration = 0;
+
 void playNote(int note, int duration) {
     buzzer_tone(&buzzer_cfg, note, 50);
     current_note_duration = duration;
@@ -51,3 +60,4 @@ void stopMusic(void) {
     is_playing_melody = 0;
     buzzer_off(&buzzer_cfg);
 }
+//you can add "int length = sizeof(melody) / sizeof(melody[0]);" in game.c to calculate the length more easier
