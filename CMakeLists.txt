@@ -54,6 +54,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/shared/Menu.c
     ${CMAKE_SOURCE_DIR}/shared/InputHandler.c
     ${CMAKE_SOURCE_DIR}/shared/selector.c
+     ${CMAKE_SOURCE_DIR}/shared/Music.c
     # Game implementations (placeholder - students implement these)
     ${CMAKE_SOURCE_DIR}/game_1/Game_1.c
     ${CMAKE_SOURCE_DIR}/game_1/engine/engine.c
