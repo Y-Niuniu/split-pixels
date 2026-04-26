@@ -1,16 +1,7 @@
 #include "music.h"
 
-Buzzer_cfg_t buzzer_cfg = {
-    .htim = &htim2,
-    .channel = TIM_CHANNEL_3,
-    .tick_freq_hz = 1000000,  
-    .min_freq_hz = 20,
-    .max_freq_hz = 20000,
-    .setup_done = 0
-};
-
-static int current_melody[];
-static int current_durations[];
+static int current_melody[512];
+static int current_durations[512];
 static int current_length = 0;
 static int current_index = 0;
 static int wholenote = 0;
@@ -32,7 +23,7 @@ void startMelody(int melody[], int durations[], int length, int bpm) {
     }
     current_length = length;
     current_index = 0;
-    wholenote = (60000 * 4) / bpm;
+    wholenote = (60000 * 4) / bpm;//bpm=90
     
     if (length > 0) {
         current_note_duration = wholenote / current_durations[0];

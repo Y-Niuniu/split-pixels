@@ -1,4 +1,5 @@
 #include "Menu.h"
+#include "Buzzer.h"
 #include "LCD.h"
 #include "InputHandler.h"
 #include "Joystick.h"
@@ -6,13 +7,14 @@
 #include <stdio.h>
 #include"game_1.h"
 #include <stdbool.h>
+#include "music.h"
 extern ST7789V2_cfg_t cfg0;  
 extern Joystick_cfg_t joystick_cfg;  
 extern Joystick_t joystick_data;     
 extern Joystick_cfg_t joystick_cfg2;  
 extern Joystick_t joystick_data2;     
 extern InputState current_input;      
-
+extern Buzzer_cfg_t buzzer_cfg;
 static const char* background_story[]={
 
     "In a galaxy far far away",
@@ -36,6 +38,65 @@ static const char* background_story[]={
     "Become a Split",  
     "Pixel master"
 };
+
+#define NOTE_C3  131
+#define NOTE_D3  147
+#define NOTE_E3  165
+#define NOTE_F3  175
+#define NOTE_G3  196
+#define NOTE_A3  220
+#define NOTE_B3  247
+#define NOTE_C4  262
+#define NOTE_D4  294
+#define NOTE_E4  330
+#define NOTE_F4  349
+#define NOTE_G4  392
+#define NOTE_A4  440
+#define NOTE_B4  494
+#define NOTE_REST 0
+
+
+int melody[] = {
+        NOTE_A3, NOTE_A3, NOTE_A3, NOTE_A3, NOTE_D4, NOTE_D4,
+        NOTE_REST,
+        NOTE_C4, NOTE_C4, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_G3, NOTE_E3,
+        NOTE_REST,
+        NOTE_A3, NOTE_A3, NOTE_A3, NOTE_A3, NOTE_D4, NOTE_D4,
+        NOTE_REST,
+        NOTE_C4, NOTE_C4, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_G3, NOTE_E3,
+        
+        NOTE_A3, 
+        NOTE_REST,
+        NOTE_B3, NOTE_G3, NOTE_E3, NOTE_A3,
+        NOTE_REST,
+        NOTE_C4, NOTE_B3, NOTE_A3, NOTE_B3, NOTE_C4, NOTE_D4,
+        NOTE_C4, NOTE_B3, NOTE_C4,
+        
+        NOTE_B3, NOTE_A3, NOTE_B3, NOTE_A3, NOTE_G3, NOTE_A3,
+        NOTE_B3, NOTE_C4, NOTE_F4, NOTE_E4, NOTE_F4,
+        NOTE_E4, NOTE_G4, NOTE_D4
+};
+int durations[] = {
+        8, 8, 8, 8, 8, 4,
+        8,
+        8, 8, 8, 8, 8, 8, 8,
+        8,
+        8, 8, 8, 8, 8, 4,
+        8,
+        8, 8, 8, 8, 8, 8, 8,
+        
+        2,
+        8,
+        8, 8, 8, 2,
+        8,
+        8, 8, 8, 8, 8, 4,
+        8, 8, 4,
+        
+        8, 8, 8, 8, 8, 4,
+        8, 8, 8, 8, 4,
+        4, 8, 4
+};
+
 
 #define NUM_BACKGROUND_LINES (sizeof(background_story) / sizeof(char*))
 #define LINE_HEIGHT 20
@@ -125,6 +186,8 @@ static void render_home_menu(MenuSystem* menu) {
 
 void Menu_Init(MenuSystem* menu) {
     menu->selected_option = 0;
+    buzzer_init(&buzzer_cfg);
+
 }
 
 MenuState Menu_Run(MenuSystem* menu) {
@@ -145,7 +208,7 @@ MenuState Menu_Run(MenuSystem* menu) {
     // Menu's own loop - runs until game is selected
     while (1) {
         uint32_t frame_start = HAL_GetTick();
-        
+        updateMusic();
         // Read input
         Input_Read();
         
@@ -156,10 +219,12 @@ MenuState Menu_Run(MenuSystem* menu) {
         if (!title_finished) {
             if (HAL_GetTick() - title_start_time >= 3000) {
                 title_finished = true;
+              startMelody(melody, durations, 58, 90);
             }
             
             if (current_input.btn3_pressed || current_input.btn9_pressed) {
                 title_finished = true;
+              startMelody(melody, durations, 58, 90);
             }
            
             render_title();
@@ -220,6 +285,7 @@ MenuState Menu_Run(MenuSystem* menu) {
             
         
             if ((p1_selection == p2_selection) && (current_input.btn3_pressed) && (current_input.btn9_pressed)) {
+                 stopMusic();
                 if (p1_selection == 0) {
                     selected_game = MENU_STATE_GAME_1;
                 } else if (p1_selection == 1) {
