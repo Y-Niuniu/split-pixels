@@ -1,10 +1,68 @@
 #include "Spaceship.h"
 #include "LCD.h"
 #include <math.h>
-#include "Sprite/SpaceshipSprite.h"
+
+// Simple triangle fill function using scanline algorithm
+void LCD_Fill_Triangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t colour) {
+    // Sort points by y-coordinate (y1 <= y2 <= y3)
+    if (y1 > y2) {
+        int16_t temp;
+        temp = x1; x1 = x2; x2 = temp;
+        temp = y1; y1 = y2; y2 = temp;
+    }
+    if (y2 > y3) {
+        int16_t temp;
+        temp = x2; x2 = x3; x3 = temp;
+        temp = y2; y2 = y3; y3 = temp;
+    }
+    if (y1 > y2) {
+        int16_t temp;
+        temp = x1; x1 = x2; x2 = temp;
+        temp = y1; y1 = y2; y2 = temp;
+    }
+    
+    // If it's a flat triangle, return
+    if (y1 == y3) return;
+    
+    // Fill the triangle using scanlines
+    for (int16_t y = y1; y <= y3; y++) {
+        float x_left = 9999.0f;   // Large number
+        float x_right = -9999.0f; // Small number
+        
+        // Check each edge for intersection with this scanline
+        // Edge 1-2
+        if (y >= y1 && y <= y2 && y2 > y1) {
+            float t = (float)(y - y1) / (float)(y2 - y1);
+            float x = x1 + t * (x2 - x1);
+            if (x < x_left) x_left = x;
+            if (x > x_right) x_right = x;
+        }
+        
+        // Edge 1-3
+        if (y >= y1 && y <= y3 && y3 > y1) {
+            float t = (float)(y - y1) / (float)(y3 - y1);
+            float x = x1 + t * (x3 - x1);
+            if (x < x_left) x_left = x;
+            if (x > x_right) x_right = x;
+        }
+        
+        // Edge 2-3
+        if (y >= y2 && y <= y3 && y3 > y2) {
+            float t = (float)(y - y2) / (float)(y3 - y2);
+            float x = x2 + t * (x3 - x2);
+            if (x < x_left) x_left = x;
+            if (x > x_right) x_right = x;
+        }
+        
+        // Draw horizontal line if we found valid intersections
+        if (x_left < x_right) {
+            LCD_Draw_Line((int16_t)x_left, y, (int16_t)x_right, y, colour);
+        }
+    }
+}
 
 // Initialize spaceship
-void Spaceship_Init(Spaceship_t* ship, float start_x, float start_y, float speed, uint8_t radius) {
+void Spaceship_Init(Spaceship_t* ship, float start_x, float start_y, float speed, uint8_t radius, uint8_t colour) {
     ship->x = start_x;// start point
     ship->y = start_y;
     // dx, dy represent the direction vector of the spaceship's movement.
@@ -13,6 +71,7 @@ void Spaceship_Init(Spaceship_t* ship, float start_x, float start_y, float speed
     ship->dy = 0.0f;
     ship->speed = speed;
     ship->radius = radius;
+    ship->colour = colour;
     ship->active = 1;  // spaceship is active
 }
 
@@ -40,34 +99,25 @@ void Spaceship_Update(Spaceship_t* ship, uint16_t screen_width, uint16_t screen_
 
 // Draw spaceship on screen
 void Spaceship_Draw(Spaceship_t* ship) {
-    if (!ship->active) return;  // do not draw if not active
-    int16_t x0 = (int16_t)(ship->x - 16.0f);
-    int16_t y0 = (int16_t)(ship->y - 16.0f);
-
-    LCD_Draw_Sprite(
-        x0,
-        y0,
-        32,
-        32,
-        (const uint8_t *)TEST_SPACESHIP
-    );
-    // // Calculate triangle points based on position and direction
-    // // Nose (front point)
-    // int16_t nose_x = (int16_t)(ship->x + ship->dx * ship->radius);
-    // int16_t nose_y = (int16_t)(ship->y + ship->dy * ship->radius);
+   
+    int16_t nose_x = (int16_t)(ship->x + ship->dx * ship->radius);
+    int16_t nose_y = (int16_t)(ship->y + ship->dy * ship->radius);
     
-    // // Left wing (smaller radius and perpendicular to direction)
-    // int16_t left_x = (int16_t)(ship->x - ship->dy * ship->radius * 0.7f);
-    // int16_t left_y = (int16_t)(ship->y + ship->dx * ship->radius * 0.7f);
+    // Left wing (smaller radius and perpendicular to direction)
+    int16_t left_x = (int16_t)(ship->x - ship->dy * ship->radius * 0.7f);
+    int16_t left_y = (int16_t)(ship->y + ship->dx * ship->radius * 0.7f);
     
-    // // Right wing (smaller radius and perpendicular to direction)
-    // int16_t right_x = (int16_t)(ship->x + ship->dy * ship->radius * 0.7f);
-    // int16_t right_y = (int16_t)(ship->y - ship->dx * ship->radius * 0.7f);
+    // Right wing (smaller radius and perpendicular to direction)
+    int16_t right_x = (int16_t)(ship->x + ship->dy * ship->radius * 0.7f);
+    int16_t right_y = (int16_t)(ship->y - ship->dx * ship->radius * 0.7f);
     
-    // // Draw the three sides of the triangle in red
-    // LCD_Draw_Line(nose_x, nose_y, left_x, left_y, LCD_COLOUR_2);   // Nose to left wing
-    // LCD_Draw_Line(left_x, left_y, right_x, right_y, LCD_COLOUR_2); // Left wing to right wing
-    // LCD_Draw_Line(right_x, right_y, nose_x, nose_y, LCD_COLOUR_2); // Right wing to nose
+    // Fill the triangle with ship colour
+    LCD_Fill_Triangle(nose_x, nose_y, left_x, left_y, right_x, right_y, ship->colour);
+    
+    // Draw the outline of the spaceship
+    LCD_Draw_Line(nose_x, nose_y, left_x, left_y, ship->colour);   // Nose to left wing
+    LCD_Draw_Line(left_x, left_y, right_x, right_y, ship->colour); // Left wing to right wing
+    LCD_Draw_Line(right_x, right_y, nose_x, nose_y, ship->colour); // Right wing to nose
 }
 
 // Change direction (rotate by 12 degrees clockwise)

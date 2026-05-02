@@ -1,6 +1,10 @@
 #include "AstroEngine.h"
+#include "LCD.h"
 #include <stdio.h>
 #include <math.h>
+
+// Forward declarations
+static void AstroEngine_HandleScoring(AstroEngine_t* engine);
 
 // Static variables for button debouncing
 static uint8_t button2_pressed = 0;
@@ -12,15 +16,27 @@ static uint8_t button7_pressed = 0;
 void AstroEngine_Init(AstroEngine_t* engine, uint16_t width, uint16_t height) {
     engine->screen_width = width;
     engine->screen_height = height;
-    Spaceship_Init(&engine->spaceship, 16.0f, 16.0f, 4.0f, 16);  // NW
-    Spaceship_Init(&engine->spaceship2, width - 15.0f, height - 15.0f, 4.0f, 15);  // SE
+    engine->score1 = 0;
+    engine->score2 = 0;
+    engine->winner = 0;
+    engine->game_state = GAME_STATE_PLAYING;
+    engine->round_screen = ROUND_SCREEN_NONE;
+    Spaceship_Init(&engine->spaceship, 16.0f, 16.0f, 4.0f, 16, LCD_COLOUR_3);  // green ship
+    Spaceship_Init(&engine->spaceship2, width - 15.0f, height - 15.0f, 4.0f, 15, LCD_COLOUR_3);  // green ship
     for (int i = 0; i < MAX_BULLETS; i++) {
         engine->bullets[i].active = 0;
     }
+    AstroEngine_LoadMap(engine, 1);
     engine->last_direction_change_tick = 0;
     engine->last_direction_change_tick2 = 0;
     engine->last_shoot_tick = 0;
     engine->last_shoot_tick2 = 0;
+    engine->current_map = 1;
+    engine->score1 = 0;
+    engine->score2 = 0;
+    engine->game_state = GAME_STATE_PLAYING;
+    engine->winner = 0;
+    AstroEngine_LoadMap(engine, 1);
 }
 
 // Update engine (spaceship movement and input)
@@ -98,14 +114,177 @@ void AstroEngine_Update(AstroEngine_t* engine) {
 
     // Check for collisions
     AstroEngine_CheckCollisions(engine);
+    
+    // Check obstacle collisions
+    AstroEngine_CheckObstacleCollisions(engine);
+}
+
+// Draw obstacles
+void AstroEngine_DrawObstacles(AstroEngine_t* engine) {
+    for (int i = 0; i < engine->obstacle_count; i++) {
+        if (engine->obstacles[i].type == OBSTACLE_LINE) {
+            LineObstacle_t* line = &engine->obstacles[i].data.line;
+            LCD_Draw_Line(line->x1, line->y1, line->x2, line->y2, LCD_COLOUR_2);  // Red color
+        } else if (engine->obstacles[i].type == OBSTACLE_RECT) {
+            RectObstacle_t* rect = &engine->obstacles[i].data.rect;
+            LCD_Draw_Rect(rect->x, rect->y, rect->width, rect->height, LCD_COLOUR_2, 1);  // Filled red rectangle
+        }
+    }
 }
 
 // Draw everything
 void AstroEngine_Draw(AstroEngine_t* engine) {
+    AstroEngine_DrawObstacles(engine);
     Spaceship_Draw(&engine->spaceship);
     Spaceship_Draw(&engine->spaceship2);
     for (int i = 0; i < MAX_BULLETS; i++) {
         Bullet_Draw(&engine->bullets[i]);
+    }
+}
+
+// Simple circle-to-circle collision detection
+uint8_t AstroEngine_CircleCollision(float x1, float y1, float r1, float x2, float y2, float r2) {
+    float dx = x1 - x2;
+    float dy = y1 - y2;
+    float distance = sqrtf(dx * dx + dy * dy);
+    return distance < (r1 + r2);
+}
+
+// Helper function to check spaceship vs obstacle collision - clamp position like walls
+void AstroEngine_CheckSpaceshipObstacleCollision(AstroEngine_t* engine, Spaceship_t* ship) {
+    for (int i = 0; i < engine->obstacle_count; i++) {
+        if (engine->obstacles[i].type == OBSTACLE_LINE) {
+            LineObstacle_t* line = &engine->obstacles[i].data.line;
+            // Check distance to line segment
+            float dx = ship->x - line->x1;
+            float dy = ship->y - line->y1;
+            float line_dx = line->x2 - line->x1;
+            float line_dy = line->y2 - line->y1;
+            float line_length = sqrtf(line_dx * line_dx + line_dy * line_dy);
+
+            if (line_length > 0) {
+                line_dx /= line_length;
+                line_dy /= line_length;
+            }
+
+            float projection = dx * line_dx + dy * line_dy;
+            if (projection < 0) projection = 0;
+            if (projection > line_length) projection = line_length;
+
+            float closest_x = line->x1 + projection * line_dx;
+            float closest_y = line->y1 + projection * line_dy;
+
+            dx = ship->x - closest_x;
+            dy = ship->y - closest_y;
+            float distance = sqrtf(dx * dx + dy * dy);
+
+            if (distance < ship->radius) {
+                // Push spaceship away from line
+                if (distance > 0) {
+                    float nx = dx / distance;
+                    float ny = dy / distance;
+                    ship->x = closest_x + nx * ship->radius;
+                    ship->y = closest_y + ny * ship->radius;
+                }
+            }
+        } else if (engine->obstacles[i].type == OBSTACLE_RECT) {
+            RectObstacle_t* rect = &engine->obstacles[i].data.rect;
+            // Find closest point on rectangle
+            float closest_x = ship->x;
+            float closest_y = ship->y;
+
+            if (closest_x < rect->x) closest_x = rect->x;
+            if (closest_x > rect->x + rect->width) closest_x = rect->x + rect->width;
+            if (closest_y < rect->y) closest_y = rect->y;
+            if (closest_y > rect->y + rect->height) closest_y = rect->y + rect->height;
+
+            float dx = ship->x - closest_x;
+            float dy = ship->y - closest_y;
+            float distance = sqrtf(dx * dx + dy * dy);
+
+            if (distance < ship->radius) {
+                // Push spaceship away from rectangle
+                if (distance > 0) {
+                    float nx = dx / distance;
+                    float ny = dy / distance;
+                    ship->x = closest_x + nx * ship->radius;
+                    ship->y = closest_y + ny * ship->radius;
+                }
+            }
+        }
+    }
+}
+
+// Helper function to check bullet vs obstacle collision - deactivates on contact
+void AstroEngine_CheckBulletObstacleCollision(AstroEngine_t* engine, Bullet_t* bullet) {
+    for (int i = 0; i < engine->obstacle_count; i++) {
+        if (engine->obstacles[i].type == OBSTACLE_LINE) {
+            LineObstacle_t* line = &engine->obstacles[i].data.line;
+            // Check distance to line segment
+            float dx = bullet->x - line->x1;
+            float dy = bullet->y - line->y1;
+            float line_dx = line->x2 - line->x1;
+            float line_dy = line->y2 - line->y1;
+            float line_length = sqrtf(line_dx * line_dx + line_dy * line_dy);
+
+            if (line_length > 0) {
+                line_dx /= line_length;
+                line_dy /= line_length;
+            }
+
+            float projection = dx * line_dx + dy * line_dy;
+            if (projection < 0) projection = 0;
+            if (projection > line_length) projection = line_length;
+
+            float closest_x = line->x1 + projection * line_dx;
+            float closest_y = line->y1 + projection * line_dy;
+
+            dx = bullet->x - closest_x;
+            dy = bullet->y - closest_y;
+            float distance = sqrtf(dx * dx + dy * dy);
+
+            if (distance < bullet->radius) {
+                Bullet_Deactivate(bullet);
+                break;
+            }
+        } else if (engine->obstacles[i].type == OBSTACLE_RECT) {
+            RectObstacle_t* rect = &engine->obstacles[i].data.rect;
+            // Find closest point on rectangle
+            float closest_x = bullet->x;
+            float closest_y = bullet->y;
+
+            if (closest_x < rect->x) closest_x = rect->x;
+            if (closest_x > rect->x + rect->width) closest_x = rect->x + rect->width;
+            if (closest_y < rect->y) closest_y = rect->y;
+            if (closest_y > rect->y + rect->height) closest_y = rect->y + rect->height;
+
+            float dx = bullet->x - closest_x;
+            float dy = bullet->y - closest_y;
+            float distance = sqrtf(dx * dx + dy * dy);
+
+            if (distance < bullet->radius) {
+                Bullet_Deactivate(bullet);
+                break;
+            }
+        }
+    }
+}
+
+// Check obstacle collisions
+void AstroEngine_CheckObstacleCollisions(AstroEngine_t* engine) {
+    // Check spaceship collisions with obstacles
+    if (engine->spaceship.active) {
+        AstroEngine_CheckSpaceshipObstacleCollision(engine, &engine->spaceship);
+    }
+    if (engine->spaceship2.active) {
+        AstroEngine_CheckSpaceshipObstacleCollision(engine, &engine->spaceship2);
+    }
+    
+    // Check bullet collisions with obstacles
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (engine->bullets[i].active) {
+            AstroEngine_CheckBulletObstacleCollision(engine, &engine->bullets[i]);
+        }
     }
 }
 
@@ -114,61 +293,189 @@ void AstroEngine_ShootBullet(AstroEngine_t* engine, Spaceship_t* ship) {
     printf("Shooting bullet!\n");
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (!engine->bullets[i].active) {
-            // Start bullet ahead of the ship to avoid immediate collision
-            float offset = ship->radius + engine->bullets[i].radius + 1.0f;  // small offset
+            // Start bullet from the ship's nose to prevent shooting through obstacles
+            float offset = ship->radius;  // Start from nose
             Bullet_Init(&engine->bullets[i], ship->x + ship->dx * offset, ship->y + ship->dy * offset, ship->dx, ship->dy, 10.0f, 4);
             break;
         }
     }
 }
 
-// Check collisions between bullets and spaceships
+// Load map configuration
+void AstroEngine_LoadMap(AstroEngine_t* engine, uint8_t map_number) {
+    engine->current_map = map_number;
+    engine->obstacle_count = 0;
+    
+    uint16_t center_x = engine->screen_width / 2;
+    uint16_t center_y = engine->screen_height / 2;
+    
+    if (map_number == 1) {
+        // Map 1: Plus sign in center
+        uint16_t plus_size = 60;  // Adjustable size
+        uint16_t thickness = 8;   // Thickness of each bar
+        
+        // Horizontal bar of plus
+        engine->obstacles[engine->obstacle_count].type = OBSTACLE_RECT;
+        engine->obstacles[engine->obstacle_count].data.rect.x = center_x - plus_size;
+        engine->obstacles[engine->obstacle_count].data.rect.y = center_y - (thickness / 2);
+        engine->obstacles[engine->obstacle_count].data.rect.width = plus_size * 2;
+        engine->obstacles[engine->obstacle_count].data.rect.height = thickness;
+        engine->obstacle_count++;
+        
+        // Vertical bar of plus
+        engine->obstacles[engine->obstacle_count].type = OBSTACLE_RECT;
+        engine->obstacles[engine->obstacle_count].data.rect.x = center_x - (thickness / 2);
+        engine->obstacles[engine->obstacle_count].data.rect.y = center_y - plus_size;
+        engine->obstacles[engine->obstacle_count].data.rect.width = thickness;
+        engine->obstacles[engine->obstacle_count].data.rect.height = plus_size * 2;
+        engine->obstacle_count++;
+        
+    } else if (map_number == 2) {
+        // Map 2: Equals sign in center
+        uint16_t equals_width = 80;  // Adjustable width
+        uint16_t equals_gap = 32;    // Vertical gap from center
+        uint16_t thickness = 8;      // Thickness of each bar
+        
+        // Top bar of equals
+        engine->obstacles[engine->obstacle_count].type = OBSTACLE_RECT;
+        engine->obstacles[engine->obstacle_count].data.rect.x = center_x - equals_width;
+        engine->obstacles[engine->obstacle_count].data.rect.y = center_y - equals_gap - (thickness / 2);
+        engine->obstacles[engine->obstacle_count].data.rect.width = equals_width * 2;
+        engine->obstacles[engine->obstacle_count].data.rect.height = thickness;
+        engine->obstacle_count++;
+        
+        // Bottom bar of equals
+        engine->obstacles[engine->obstacle_count].type = OBSTACLE_RECT;
+        engine->obstacles[engine->obstacle_count].data.rect.x = center_x - equals_width;
+        engine->obstacles[engine->obstacle_count].data.rect.y = center_y + equals_gap - (thickness / 2);
+        engine->obstacles[engine->obstacle_count].data.rect.width = equals_width * 2;
+        engine->obstacles[engine->obstacle_count].data.rect.height = thickness;
+        engine->obstacle_count++;
+        
+    } else if (map_number == 3) {
+        // Map 3: 4 squares closer to the center pointing inward
+        uint16_t square_size = 40;  // Size of each square
+        uint16_t gap = 20;          // Gap between center and squares
+        
+        // Top-left square (pointing down-right)
+        engine->obstacles[engine->obstacle_count].type = OBSTACLE_RECT;
+        engine->obstacles[engine->obstacle_count].data.rect.x = center_x - square_size - gap;
+        engine->obstacles[engine->obstacle_count].data.rect.y = center_y - square_size - gap;
+        engine->obstacles[engine->obstacle_count].data.rect.width = square_size;
+        engine->obstacles[engine->obstacle_count].data.rect.height = square_size;
+        engine->obstacle_count++;
+        
+        // Top-right square (pointing down-left)
+        engine->obstacles[engine->obstacle_count].type = OBSTACLE_RECT;
+        engine->obstacles[engine->obstacle_count].data.rect.x = center_x + gap;
+        engine->obstacles[engine->obstacle_count].data.rect.y = center_y - square_size - gap;
+        engine->obstacles[engine->obstacle_count].data.rect.width = square_size;
+        engine->obstacles[engine->obstacle_count].data.rect.height = square_size;
+        engine->obstacle_count++;
+        
+        // Bottom-left square (pointing up-right)
+        engine->obstacles[engine->obstacle_count].type = OBSTACLE_RECT;
+        engine->obstacles[engine->obstacle_count].data.rect.x = center_x - square_size - gap;
+        engine->obstacles[engine->obstacle_count].data.rect.y = center_y + gap;
+        engine->obstacles[engine->obstacle_count].data.rect.width = square_size;
+        engine->obstacles[engine->obstacle_count].data.rect.height = square_size;
+        engine->obstacle_count++;
+        
+        // Bottom-right square (pointing up-left)
+        engine->obstacles[engine->obstacle_count].type = OBSTACLE_RECT;
+        engine->obstacles[engine->obstacle_count].data.rect.x = center_x + gap;
+        engine->obstacles[engine->obstacle_count].data.rect.y = center_y + gap;
+        engine->obstacles[engine->obstacle_count].data.rect.width = square_size;
+        engine->obstacles[engine->obstacle_count].data.rect.height = square_size;
+        engine->obstacle_count++;
+    }
+}
+
+// Check collisions between bullets and spaceships (circle-to-circle only)
 void AstroEngine_CheckCollisions(AstroEngine_t* engine) {
-    // Check collision between spaceships
+    // Check collision between spaceships - deactivate both on contact
     if (engine->spaceship.active && engine->spaceship2.active) {
-        float dx = engine->spaceship.x - engine->spaceship2.x;
-        float dy = engine->spaceship.y - engine->spaceship2.y;
-        float distance = sqrtf(dx * dx + dy * dy);
-        float min_distance = engine->spaceship.radius + engine->spaceship2.radius;
-        if (distance < min_distance) {
-            // Separate them like wall collision: clamp positions without changing direction
-            float overlap = min_distance - distance;
-            if (distance > 0) {
-                float nx = dx / distance;
-                float ny = dy / distance;
-                engine->spaceship.x += nx * overlap / 2.0f;
-                engine->spaceship.y += ny * overlap / 2.0f;
-                engine->spaceship2.x -= nx * overlap / 2.0f;
-                engine->spaceship2.y -= ny * overlap / 2.0f;
-            }
+        if (AstroEngine_CircleCollision(engine->spaceship.x, engine->spaceship.y, engine->spaceship.radius,
+                                        engine->spaceship2.x, engine->spaceship2.y, engine->spaceship2.radius)) {
+            Spaceship_Deactivate(&engine->spaceship);
+            Spaceship_Deactivate(&engine->spaceship2);
+            
+            // Both get deactivated, no score for this
+            printf("Spaceships collided!\n");
+            return;
         }
     }
 
+    // Check bullet collisions
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (!engine->bullets[i].active) continue;
 
-        // Check collision with spaceship
+        // Check collision with spaceship1
         if (engine->spaceship.active) {
-            float dx = engine->bullets[i].x - engine->spaceship.x;
-            float dy = engine->bullets[i].y - engine->spaceship.y;
-            float distance = sqrtf(dx * dx + dy * dy);
-            if (distance < engine->bullets[i].radius + engine->spaceship.radius) {
+            if (AstroEngine_CircleCollision(engine->bullets[i].x, engine->bullets[i].y, engine->bullets[i].radius,
+                                            engine->spaceship.x, engine->spaceship.y, engine->spaceship.radius)) {
                 Bullet_Deactivate(&engine->bullets[i]);
                 Spaceship_Deactivate(&engine->spaceship);
+                
+                // Spaceship2 scores
+                engine->score2++;
+                printf("Spaceship 2 scores! Score: %d-%d\n", engine->score1, engine->score2);
+                AstroEngine_HandleScoring(engine);
                 continue;
             }
         }
 
         // Check collision with spaceship2
         if (engine->spaceship2.active) {
-            float dx = engine->bullets[i].x - engine->spaceship2.x;
-            float dy = engine->bullets[i].y - engine->spaceship2.y;
-            float distance = sqrtf(dx * dx + dy * dy);
-            if (distance < engine->bullets[i].radius + engine->spaceship2.radius) {
+            if (AstroEngine_CircleCollision(engine->bullets[i].x, engine->bullets[i].y, engine->bullets[i].radius,
+                                            engine->spaceship2.x, engine->spaceship2.y, engine->spaceship2.radius)) {
                 Bullet_Deactivate(&engine->bullets[i]);
                 Spaceship_Deactivate(&engine->spaceship2);
+                
+                // Spaceship1 scores
+                engine->score1++;
+                printf("Spaceship 1 scores! Score: %d-%d\n", engine->score1, engine->score2);
+                AstroEngine_HandleScoring(engine);
                 continue;
             }
         }
     }
 }
+
+// Handle scoring and map progression
+static void AstroEngine_HandleScoring(AstroEngine_t* engine) {
+    // Respawn spaceships with their colours preserved
+    Spaceship_Init(&engine->spaceship, 16.0f, 16.0f, 4.0f, 16, LCD_COLOUR_3);
+    Spaceship_Init(&engine->spaceship2, engine->screen_width - 15.0f, engine->screen_height - 15.0f, 4.0f, 15, LCD_COLOUR_3);
+    
+    if (engine->current_map == 1) {
+        AstroEngine_LoadMap(engine, 2);
+        engine->round_screen = ROUND_SCREEN_NEXT;
+        printf("Next round: Map 2\n");
+    } else if (engine->current_map == 2) {
+        if (engine->score1 > engine->score2) {
+            engine->game_state = GAME_STATE_END;
+            engine->winner = 1;
+            printf("Game Over! Spaceship 1 wins!\n");
+        } else if (engine->score2 > engine->score1) {
+            AstroEngine_LoadMap(engine, 3);
+            engine->round_screen = ROUND_SCREEN_FINAL;
+            printf("Final round: Map 3\n");
+        } else {
+            AstroEngine_LoadMap(engine, 3);
+            engine->round_screen = ROUND_SCREEN_FINAL;
+            printf("Final round: Map 3\n");
+        }
+    } else if (engine->current_map == 3) {
+        engine->game_state = GAME_STATE_END;
+        if (engine->score1 > engine->score2) {
+            engine->winner = 1;
+            printf("Game Over! Spaceship 1 wins!\n");
+        } else {
+            engine->winner = 2;
+            printf("Game Over! Spaceship 2 wins!\n");
+        }
+    }
+}
+
+
