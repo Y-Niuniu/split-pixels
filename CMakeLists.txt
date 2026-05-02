@@ -69,6 +69,10 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 
     ${CMAKE_SOURCE_DIR}/game_2/Game_2.c
     ${CMAKE_SOURCE_DIR}/game_2/enemysetting/enemysetting.c
+    ${CMAKE_SOURCE_DIR}/game_2/playersetting/playersetting.c
+    ${CMAKE_SOURCE_DIR}/game_2/bulletsetting/bulletsetting.c
+    ${CMAKE_SOURCE_DIR}/game_2/weaponsetting/weaponsetting.c
+    ${CMAKE_SOURCE_DIR}/game_2/map/map.c
     ${CMAKE_SOURCE_DIR}/game_3/Game_3.c
     ${CMAKE_SOURCE_DIR}/game_3/AstroEngine/AstroEngine.c
     ${CMAKE_SOURCE_DIR}/game_3/Spaceship/Spaceship.c
