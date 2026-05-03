@@ -8,6 +8,7 @@
 #include"game_1.h"
 #include <stdbool.h>
 #include "music.h"
+#include "melody.h"
 extern ST7789V2_cfg_t cfg0;  
 extern Joystick_cfg_t joystick_cfg;  
 extern Joystick_t joystick_data;     
@@ -39,65 +40,6 @@ static const char* background_story[]={
     "Pixel master"
 };
 
-#define NOTE_C3  131
-#define NOTE_D3  147
-#define NOTE_E3  165
-#define NOTE_F3  175
-#define NOTE_G3  196
-#define NOTE_A3  220
-#define NOTE_B3  247
-#define NOTE_C4  262
-#define NOTE_D4  294
-#define NOTE_E4  330
-#define NOTE_F4  349
-#define NOTE_G4  392
-#define NOTE_A4  440
-#define NOTE_B4  494
-#define NOTE_REST 0
-
-
-int melody[] = {
-        NOTE_A3, NOTE_A3, NOTE_A3, NOTE_A3, NOTE_D4, NOTE_D4,
-        NOTE_REST,
-        NOTE_C4, NOTE_C4, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_G3, NOTE_E3,
-        NOTE_REST,
-        NOTE_A3, NOTE_A3, NOTE_A3, NOTE_A3, NOTE_D4, NOTE_D4,
-        NOTE_REST,
-        NOTE_C4, NOTE_C4, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_G3, NOTE_E3,
-        
-        NOTE_A3, 
-        NOTE_REST,
-        NOTE_B3, NOTE_G3, NOTE_E3, NOTE_A3,
-        NOTE_REST,
-        NOTE_C4, NOTE_B3, NOTE_A3, NOTE_B3, NOTE_C4, NOTE_D4,
-        NOTE_C4, NOTE_B3, NOTE_C4,
-        
-        NOTE_B3, NOTE_A3, NOTE_B3, NOTE_A3, NOTE_G3, NOTE_A3,
-        NOTE_B3, NOTE_C4, NOTE_F4, NOTE_E4, NOTE_F4,
-        NOTE_E4, NOTE_G4, NOTE_D4
-};
-int durations[] = {
-        8, 8, 8, 8, 8, 4,
-        8,
-        8, 8, 8, 8, 8, 8, 8,
-        8,
-        8, 8, 8, 8, 8, 4,
-        8,
-        8, 8, 8, 8, 8, 8, 8,
-        
-        2,
-        8,
-        8, 8, 8, 2,
-        8,
-        8, 8, 8, 8, 8, 4,
-        8, 8, 4,
-        
-        8, 8, 8, 8, 8, 4,
-        8, 8, 8, 8, 4,
-        4, 8, 4
-};
-
-
 #define NUM_BACKGROUND_LINES (sizeof(background_story) / sizeof(char*))
 #define LINE_HEIGHT 20
 #define TITLE_HEIGHT 40
@@ -106,6 +48,8 @@ int durations[] = {
 
 static int p1_selection=0;
 static int p2_selection=0;
+static int p1_ready=0;
+static int p2_ready=0;
 static uint32_t title_start_time = 0;  
 static bool title_finished = false;    
 
@@ -161,7 +105,7 @@ static void render_home_menu(MenuSystem* menu) {
         // Print menu option text
         LCD_printString((char*)menu_options[i], 60, y_pos, 1, 2);
         
-        if (i == p1_selection && i == p2_selection) {
+        if (i == p1_selection && i == p2_selection&& p1_ready && p2_ready) {
             LCD_Draw_Circle(40, y_pos, 5, 3, 1);
             LCD_Draw_Rect(140, y_pos, 10, 10, 5, 1);
         } else {
@@ -175,7 +119,7 @@ static void render_home_menu(MenuSystem* menu) {
     }
     
     // Instructions
-    LCD_printString("Both player press Joystick button to start", 50, 240, 1, 1);
+    LCD_printString("Each player press button to confirm", 50, 240, 1, 1);
     
     LCD_Refresh(&cfg0);
 }
@@ -203,6 +147,8 @@ MenuState Menu_Run(MenuSystem* menu) {
     line_offset = 0;
     p1_selection = 0;
     p2_selection = 0;
+    p1_ready=false;
+    p2_ready=false;
     title_start_time = HAL_GetTick();
     
     // Menu's own loop - runs until game is selected
@@ -219,18 +165,21 @@ MenuState Menu_Run(MenuSystem* menu) {
         if (!title_finished) {
             if (HAL_GetTick() - title_start_time >= 3000) {
                 title_finished = true;
-              startMelody(melody, durations, 58, 90);
+              startMelody(melody, durations, MELODY_LENGTH, 90);
             }
             
             if (current_input.btn3_pressed || current_input.btn9_pressed) {
                 title_finished = true;
-              startMelody(melody, durations, 58, 90);
+              startMelody(melody, durations, MELODY_LENGTH, 90);
             }
            
             render_title();
         } else if (!story_finished) {
-            // Story phase: scroll story and allow skip
-            if (current_input.btn3_pressed || current_input.btn9_pressed) {
+            // Story phase: scroll story and allow skip (any button)
+            if (current_input.btn2_pressed || current_input.btn3_pressed ||
+                current_input.btn6_pressed || current_input.btn7_pressed ||
+                current_input.btn9_pressed) {
+                stopMusic();
                 story_finished = true;
             }
             
@@ -249,8 +198,9 @@ MenuState Menu_Run(MenuSystem* menu) {
             if (p1_current_direction == S && p1_last_direction != S) { 
                 // Move selection down
                 p1_selection++;
+                p1_ready=false;
                 if (p1_selection >= NUM_MENU_OPTIONS) {
-                    p1_selection = 0;  // Wrap around
+                    p1_selection = 0;  
                 }
             } 
             else if (p1_current_direction == N && p1_last_direction != N) { 
@@ -260,13 +210,14 @@ MenuState Menu_Run(MenuSystem* menu) {
                 } else {
                     p1_selection--;
                 }
+                p1_ready=false;
             }
             
             p1_last_direction = p1_current_direction;
             Direction p2_current_direction = joystick_data2.direction;
             
             if (p2_current_direction == S && p2_last_direction != S) { 
-          
+                p2_ready=false;
                 p2_selection++;
                 if (p2_selection >= NUM_MENU_OPTIONS) {
                     p2_selection = 0; 
@@ -279,12 +230,21 @@ MenuState Menu_Run(MenuSystem* menu) {
                 } else {
                     p2_selection--;
                 }
+                p2_ready=false;
             }
             
             p2_last_direction = p2_current_direction;
             
-        
-            if ((p1_selection == p2_selection) && (current_input.btn3_pressed) && (current_input.btn9_pressed)) {
+            if (current_input.btn3_pressed) {
+                p1_ready=true;
+            }
+            if (current_input.btn9_pressed) {
+                p2_ready=true;
+            }
+
+
+
+            if ((p1_selection == p2_selection) && p1_ready && p2_ready) {
                  stopMusic();
                 if (p1_selection == 0) {
                     selected_game = MENU_STATE_GAME_1;
