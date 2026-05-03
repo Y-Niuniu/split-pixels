@@ -138,15 +138,6 @@ static void render_home_menu(MenuSystem* menu) {
 // ==============================================
 
 void Menu_Init(MenuSystem* menu) {
-<<<<<<< HEAD
-    menu->selected_option = 1;   // Game 2
-}
-
-MenuState Menu_Run(MenuSystem* menu) {
-    (void)menu;
-    return MENU_STATE_GAME_2;
-}
-=======
     menu->selected_option = 0;
     buzzer_init(&buzzer_cfg);
 
@@ -305,4 +296,3 @@ MenuState Menu_Run(MenuSystem* menu) {
 //     (void)menu;
 //     return MENU_STATE_GAME_3;
 // }
->>>>>>> 213b928e0d1592520cfeb4ad6b9ac4a125debaf3
