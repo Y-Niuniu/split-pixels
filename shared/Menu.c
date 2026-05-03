@@ -50,7 +50,8 @@ static int p1_selection=0;
 static int p2_selection=0;
 static int p1_ready=0;
 static int p2_ready=0;
-static uint32_t title_start_time = 0;  
+static uint32_t launch_timer = 0;
+static uint32_t title_start_time = 0;
 static bool title_finished = false;    
 
 
@@ -105,15 +106,23 @@ static void render_home_menu(MenuSystem* menu) {
         // Print menu option text
         LCD_printString((char*)menu_options[i], 60, y_pos, 1, 2);
         
-        if (i == p1_selection && i == p2_selection&& p1_ready && p2_ready) {
+        if (i == p1_selection && i == p2_selection && p1_ready && p2_ready) {
             LCD_Draw_Circle(40, y_pos, 5, 3, 1);
             LCD_Draw_Rect(140, y_pos, 10, 10, 5, 1);
         } else {
             if (i == p1_selection) {
-                LCD_Draw_Circle(40, y_pos, 5, 3, 0);
+                if (p1_ready) {
+                    LCD_Draw_Circle(40, y_pos, 5, 3, 1);
+                } else {
+                    LCD_Draw_Circle(40, y_pos, 5, 3, 0);
+                }
             }
             if (i == p2_selection) {
-                LCD_Draw_Rect(140, y_pos, 10, 10, 5, 0);
+                if (p2_ready) {
+                    LCD_Draw_Rect(140, y_pos, 10, 10, 5, 1);
+                } else {
+                    LCD_Draw_Rect(140, y_pos, 10, 10, 5, 0);
+                }
             }
         }
     }
@@ -149,6 +158,7 @@ MenuState Menu_Run(MenuSystem* menu) {
     p2_selection = 0;
     p1_ready=false;
     p2_ready=false;
+    launch_timer = 0;
     title_start_time = HAL_GetTick();
     
     // Menu's own loop - runs until game is selected
@@ -245,15 +255,22 @@ MenuState Menu_Run(MenuSystem* menu) {
 
 
             if ((p1_selection == p2_selection) && p1_ready && p2_ready) {
-                 stopMusic();
-                if (p1_selection == 0) {
-                    selected_game = MENU_STATE_GAME_1;
-                } else if (p1_selection == 1) {
-                    selected_game = MENU_STATE_GAME_2;
-                } else if (p1_selection == 2) {
-                    selected_game = MENU_STATE_GAME_3;
+                if (launch_timer == 0) {
+                    launch_timer = HAL_GetTick();
+                    stopMusic();
                 }
-                break; 
+                if (HAL_GetTick() - launch_timer >= 500) {
+                    if (p1_selection == 0) {
+                        selected_game = MENU_STATE_GAME_1;
+                    } else if (p1_selection == 1) {
+                        selected_game = MENU_STATE_GAME_2;
+                    } else if (p1_selection == 2) {
+                        selected_game = MENU_STATE_GAME_3;
+                    }
+                    break;
+                }
+            } else {
+                launch_timer = 0;
             }
             
             // Render menu

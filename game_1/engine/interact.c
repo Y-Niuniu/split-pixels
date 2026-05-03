@@ -52,7 +52,10 @@ void Zombie_Init(void){
     game_over = false;
     wave_state = WAVE_IDLE;
 }
-
+void Zombie_ResetGameStartTime(void){
+    game_start_time = HAL_GetTick();
+    last_generate_time = game_start_time;
+}
 void zombie_generate(zombietype_t type, int row){
 if(zombie_count>=MAX_ZOMBIES){
     return;
