@@ -171,12 +171,59 @@ if (wave_state != WAVE_IDLE && now >= wave_spawn_delay_timer) {
 
 
 void Zombie_Render(void) {
+    // Animation tick: alternate (0/1) every 300ms — same beat for all zombies
+    uint8_t anim_phase = (HAL_GetTick() / 300) % 2;
+
     for (int i = 0; i < MAX_ZOMBIES; i++) {
-        if (zombie_instances[i].is_alive) {
-            const uint8_t* sprite = zombie_status[zombie_instances[i].type].sprite;
-            if (sprite) {
-                LCD_Draw_Sprite(zombie_instances[i].x, zombie_instances[i].y, 40, 27, sprite);
-            }
+        if (!zombie_instances[i].is_alive) continue;
+
+        const uint8_t** frames = NULL;
+        int frame_idx = 0;
+        bool attacking = zombie_instances[i].is_attacking;
+
+        switch (zombie_instances[i].type) {
+            case normal:
+                // normal: walk = 0<->1, attack = 0<->2
+                frames = TEST_ZOMBIE1_FRAMES;
+                if (attacking) {
+                    if (anim_phase == 0) {
+                        frame_idx = 0;
+                    } else {
+                        frame_idx = 2;
+                    }
+                } else {
+                    if (anim_phase == 0) {
+                        frame_idx = 0;
+                    } else {
+                        frame_idx = 1;
+                    }
+                }
+                break;
+            case bucket:
+                // bucket: walk = 0<->2, attack = 0<->1
+                frames = TEST_ZOMBIE2_FRAMES;
+                if (attacking) {
+                    if (anim_phase == 0) {
+                        frame_idx = 0;
+                    } else {
+                        frame_idx = 1;
+                    }
+                } else {
+                    if (anim_phase == 0) {
+                        frame_idx = 0;
+                    } else {
+                        frame_idx = 2;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        if (!frames) continue;
+
+        const uint8_t* sprite = frames[frame_idx];
+        if (sprite) {
+            LCD_Draw_Sprite(zombie_instances[i].x, zombie_instances[i].y, 40, 27, sprite);
         }
     }
 }
