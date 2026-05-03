@@ -2,6 +2,9 @@
 #define BULLETSETTING_H
 #include <stdint.h>
 
+#define MAX_BULLETS_PLAYER 300
+#define MAX_BULLETS_ENEMY  100
+
 typedef enum {
     BULLET_TEAM_PLAYER,
     BULLET_TEAM_ENEMY
@@ -35,5 +38,7 @@ void the_Bullet_Update(Bullet* b);
 void the_Bullet_Deactivate(Bullet* b);
 
 void the_Bullet_Draw(Bullet* b);
+
+void the_Bullet_Fire(Bullet pool[], int pool_size, float x, float y, float dx, float dy, float speed, int damage, uint8_t radius, BULLET_TEAM team, BULLET_TYPE type, int explosion_damage, float explosion_radius);
 
 #endif // BULLETSETTING_H

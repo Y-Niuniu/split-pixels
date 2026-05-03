@@ -312,10 +312,10 @@
 #include "Menu.h"
 
 void Menu_Init(MenuSystem* menu) {
-    menu->selected_option = 2;   // Game 3
+    menu->selected_option = 1;   // Game 2
 }
 
 MenuState Menu_Run(MenuSystem* menu) {
     (void)menu;
-    return MENU_STATE_GAME_3;
+    return MENU_STATE_GAME_2;
 }

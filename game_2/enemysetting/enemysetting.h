@@ -42,7 +42,7 @@ uint8_t Enemy_IsInExplosionRadius(const Enemy* e, float x, float y);  // Check i
 
 void Enemy_CheckExplosionDamage(const Enemy* e, Player* p1, Player* p2);  // Check if players are in explosion radius and apply damage if necessary
 
-void Enemy_UpdateMovement(Enemy* e, float p1_x, float p1_y, float p2_x, float p2_y);  // Update enemy movement based on its type and behavior
+void Enemy_UpdateMovement(Enemy* e, float p1_x, float p1_y, uint8_t p1_alive, float p2_x, float p2_y, uint8_t p2_alive);  // Update enemy movement based on its type and behavior
 
 uint8_t Enemy_TryShoot(Enemy* e);  // Check if enemy can shoot based on shoot delay, return 1 if it can shoot, otherwise return 0
 

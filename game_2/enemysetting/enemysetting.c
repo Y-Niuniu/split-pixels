@@ -25,7 +25,7 @@ void Enemy_Init(Enemy* e, ENEMY_TYPE type, float x, float y) {
         case ENEMY_NORMAL:
             e->radius = 5.0f;
             e->health = 2;
-            e->maxspeed = 20.0f;
+            e->maxspeed = 5.0f;
             e->collision_damage = 0;
 
             e->boomer = 0;
@@ -34,14 +34,14 @@ void Enemy_Init(Enemy* e, ENEMY_TYPE type, float x, float y) {
             break;
             
         case ENEMY_HEAVY:
-            e->radius = 10.0f;
+            e->radius = 7.0f;
             e->health = 3;
-            e->maxspeed = 15.0f;
+            e->maxspeed = 3.0f;
             e->collision_damage = 1;
             
             e->boomer = 1;
-            e->explosion_damage = 1;
-            e->explosion_radius = 20.0f;
+            e->explosion_damage = 2;
+            e->explosion_radius = 35.0f;
             break;
     }
 }
@@ -69,7 +69,7 @@ void Enemy_CheckExplosionDamage(const Enemy* e, Player* p1, Player* p2) {
     }
 }
 
-void Enemy_UpdateMovement(Enemy* e, float p1_x, float p1_y, float p2_x, float p2_y) {
+void Enemy_UpdateMovement(Enemy* e, float p1_x, float p1_y, uint8_t p1_alive, float p2_x, float p2_y, uint8_t p2_alive) {
     if (!e->is_active) return;
 
     uint32_t now = HAL_GetTick();
@@ -81,11 +81,19 @@ void Enemy_UpdateMovement(Enemy* e, float p1_x, float p1_y, float p2_x, float p2
         float dist2 = sqrtf(dx2 * dx2 + dy2 * dy2);
 
         float target_dx, target_dy;
+        if (p1_alive && p2_alive) {
         if (dist1 <= dist2) {
             target_dx = dx1; target_dy = dy1;
         } else {
             target_dx = dx2; target_dy = dy2;
+        }}
+        else if (p1_alive) {
+            target_dx = dx1; target_dy = dy1;
         }
+        else if (p2_alive) {
+            target_dx = dx2; target_dy = dy2;
+        }
+
 
         float dist = sqrtf(target_dx * target_dx + target_dy * target_dy);
         if (dist > 0.001f) {
@@ -95,8 +103,6 @@ void Enemy_UpdateMovement(Enemy* e, float p1_x, float p1_y, float p2_x, float p2
 
         e->is_moving = 1;
         e->current_speed = e->maxspeed;
-        e->x += e->move_dx * e->current_speed;
-        e->y += e->move_dy * e->current_speed;
         return;
     }
 
@@ -107,7 +113,7 @@ void Enemy_UpdateMovement(Enemy* e, float p1_x, float p1_y, float p2_x, float p2
             e->move_dx = 0;
             e->move_dy = 0;
             e->current_speed = 0;
-            e->move_duration = 800 + rand() % 2200;
+            e->move_duration = 800 + rand() % 1600;
             
         } else {
             e->is_moving = 1;
@@ -116,18 +122,13 @@ void Enemy_UpdateMovement(Enemy* e, float p1_x, float p1_y, float p2_x, float p2
             e->move_dx = cosf(angle);
             e->move_dy = sinf(angle);
 
-            float minspeed =10.0f;
+            float minspeed =1.0f;
             e->current_speed = (rand() % 101 / 100.0f) * (e->maxspeed - minspeed) + minspeed;
 
             e->move_duration = 300 + rand() % 1200;
         }
 
         e->move_start_time = now;
-    }
-
-    if (e->is_moving) {
-        e->x += e->move_dx * e->current_speed;
-        e->y += e->move_dy * e->current_speed;
     }
 }
 
@@ -151,7 +152,7 @@ uint8_t Enemy_TryShoot(Enemy* e) {
 
     if (elapsed >= e->next_shot_delay - pressure_bonus) {
         e->last_shot_time = now;
-        e->next_shot_delay = 1000 + rand() % 2000;
+        e->next_shot_delay = 700 + rand() % 2000;
         return 1;
     }
 
@@ -167,7 +168,7 @@ void Enemy_Draw(Enemy* e) {
             color = 6;
             break;
         case ENEMY_HEAVY:
-            color = (e->health <= 1) ? 10 : 2;
+            color = (e->health <= 1) ? 2 : 10;
             break;
     }
     LCD_Draw_Circle((uint16_t)e->x, (uint16_t)e->y, (uint16_t)e->radius, color, 0);

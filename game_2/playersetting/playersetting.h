@@ -11,7 +11,6 @@ typedef struct {
     uint8_t is_active;
     int health;
     float speed;
-    int score;
     WEAPON_TYPE current_weapon;
 
     uint8_t  burst_active;

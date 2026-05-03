@@ -46,3 +46,12 @@ void the_Bullet_Draw(Bullet* b) {
 
     LCD_Draw_Circle((uint16_t)b->x, (uint16_t)b->y, b->radius, color, 1);
 }
+
+void the_Bullet_Fire(Bullet pool[], int pool_size, float x, float y, float dx, float dy, float speed, int damage, uint8_t radius, BULLET_TEAM team, BULLET_TYPE type, int explosion_damage, float explosion_radius) {
+    for (int i = 0; i < pool_size; i++) {
+        if (!pool[i].is_active) {
+            the_Bullet_Init(&pool[i], x, y, dx, dy, speed, damage, radius, team, type, explosion_damage, explosion_radius);
+            return;
+        }
+    }
+}

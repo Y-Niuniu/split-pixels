@@ -6,11 +6,10 @@ void Player_Init(Player* p, float start_x, float start_y, const char* name) {
     p->name = name;
     p->x = start_x;
     p->y = start_y;
-    p->radius = 5.0f;
+    p->radius = 3.0f;
     p->is_active = 1;
     p->health = 7;
-    p->speed = 30.0f;
-    p->score = 0;
+    p->speed = 7.0f;
     p->current_weapon = WEAPON_PISTOL;
 
     p->burst_active    = 0;
