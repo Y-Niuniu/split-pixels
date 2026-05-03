@@ -20,6 +20,7 @@ uint8_t attack_interval;
 extern zombieinstance_t zombie_instances[MAX_ZOMBIES];
 
 void Zombie_Init(void);
+void Zombie_ResetGameStartTime(void);
 void Zombie_Update(uint32_t delta_ms);
 void Zombie_Render(void);
 void Damage_Determination(void);
