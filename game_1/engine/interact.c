@@ -16,6 +16,7 @@ static int zombie_count = 0;
 static uint32_t game_start_time = 0;
 static uint32_t last_generate_time = 0;
 static uint32_t next_generate_time = 0;
+uint32_t last_damage_time = 0;
 static int game_score = 0;
 static bool game_victory = false;
 static bool game_over = false;
@@ -43,6 +44,10 @@ void Zombie_Init(void){
     zombie_count=0;
     for(int i=0;i<MAX_ZOMBIES;i++){
         zombie_instances[i].is_alive = false;
+        zombie_instances[i].hit_time = 0;
+        zombie_instances[i].is_attacking = false;
+        zombie_instances[i].hit_time = 0;
+        zombie_instances[i].attack_interval = 0;
     }
     game_start_time = HAL_GetTick();
     last_generate_time = game_start_time;
@@ -137,7 +142,7 @@ if (wave_state != WAVE_IDLE && now >= wave_spawn_delay_timer) {
             break;
         case WAVE_SPAWNING_ROW_2:
             row_to_spawn = 2;
-            next_state = WAVE_IDLE; // End of wave
+            next_state = WAVE_IDLE; 
             break;
         case WAVE_IDLE:
         default:
@@ -155,7 +160,7 @@ if (wave_state != WAVE_IDLE && now >= wave_spawn_delay_timer) {
         }
     }
 
-    // Transition to the next state
+   
     wave_state = next_state;
 
     // If the wave is not finished, set the timer for the next row
@@ -172,11 +177,12 @@ if (wave_state != WAVE_IDLE && now >= wave_spawn_delay_timer) {
 
 void Zombie_Render(void) {
     // Animation tick: alternate (0/1) every 300ms — same beat for all zombies
+   uint32_t now = HAL_GetTick();
     uint8_t anim_phase = (HAL_GetTick() / 300) % 2;
-
+    
     for (int i = 0; i < MAX_ZOMBIES; i++) {
         if (!zombie_instances[i].is_alive) continue;
-
+         bool just_hit = (zombie_instances[i].hit_time != 0) &&((now - zombie_instances[i].hit_time) < HIT_FLASH);
         const uint8_t** frames = NULL;
         int frame_idx = 0;
         bool attacking = zombie_instances[i].is_attacking;
@@ -185,113 +191,154 @@ void Zombie_Render(void) {
             case normal:
                 // normal: walk = 0<->1, attack = 0<->2
                 frames = TEST_ZOMBIE1_FRAMES;
-                if (attacking) {
-                    if (anim_phase == 0) {
-                        frame_idx = 0;
-                    } else {
-                        frame_idx = 2;
-                    }
+              if (attacking) {
+            if (anim_phase == 0) {
+                if (just_hit) {
+                    frame_idx = 1;
                 } else {
-                    if (anim_phase == 0) {
-                        frame_idx = 0;
-                    } else {
-                        frame_idx = 1;
-                    }
+                    frame_idx = 0;
                 }
+            } else {
+                if (just_hit) {
+                    frame_idx = 5;
+                } else {
+                    frame_idx = 4;
+                }
+            }
+        } else {
+            if (anim_phase == 0) {
+             if (just_hit) {
+            frame_idx = 1;
+                } else {
+            frame_idx = 0;
+            }
+            } else {
+                if (just_hit) {
+            frame_idx = 3;
+             } else {
+            frame_idx = 2;
+            }
+        }
+    }
                 break;
-            case bucket:
-                // bucket: walk = 0<->2, attack = 0<->1
+           case bucket:
                 frames = TEST_ZOMBIE2_FRAMES;
-                if (attacking) {
-                    if (anim_phase == 0) {
-                        frame_idx = 0;
-                    } else {
-                        frame_idx = 1;
-                    }
+                 if (attacking) {
+            if (anim_phase == 0) {
+                if (just_hit) {
+                    frame_idx = 1;
                 } else {
-                    if (anim_phase == 0) {
-                        frame_idx = 0;
-                    } else {
-                        frame_idx = 2;
-                    }
+                    frame_idx = 0;
                 }
+            } else {
+                if (just_hit) {
+                    frame_idx = 5;
+                } else {
+                    frame_idx = 4;
+                }
+            }
+        } else {
+            if (anim_phase == 0) {
+             if (just_hit) {
+            frame_idx = 1;
+                } else {
+            frame_idx = 0;
+            }
+            } else {
+                if (just_hit) {
+            frame_idx = 3;
+             } else {
+            frame_idx = 2;
+            }
+        }
+    }
                 break;
-            default:
+                default:
                 break;
         }
         if (!frames) continue;
-
+        zombietype_t type=zombie_instances[i].type;
+        uint8_t h = zombie_status[type].h;
+        uint8_t w = zombie_status[type].w;
         const uint8_t* sprite = frames[frame_idx];
         if (sprite) {
-            LCD_Draw_Sprite(zombie_instances[i].x, zombie_instances[i].y, 40, 27, sprite);
+            LCD_Draw_Sprite((int16_t)zombie_instances[i].x, zombie_instances[i].y, h, w, sprite);
         }
     }
-}
+ }
+
 
 extern Planting_t battle_grid[][5];
 extern uint16_t plant_health[][5];
 extern const uint16_t b_x[];
 
-void Damage_Determination(void){
-// shooter damage logic;
-for(int row=0;row<3;row++){
-    for(int col=0;col<5;col++){
-        if(battle_grid[row][col]==plant_shooter){
-            zombieinstance_t* target_zombie = NULL;
-            int max_x = -1;
-            for(int i=0;i<MAX_ZOMBIES;i++){
-                if(zombie_instances[i].is_alive && zombie_instances[i].row == row){
-                    if(zombie_instances[i].x > max_x){
-                        max_x = zombie_instances[i].x;
-                        target_zombie = &zombie_instances[i];
-                    }
-                }
-            }
-            if(target_zombie != NULL){
-                target_zombie->health -= plant_status[plant_shooter].DPS;
-                if(target_zombie->health <= 0){
-                    target_zombie->is_alive = false;
-                    zombie_count--;
-                    Score_Add(zombie_status[target_zombie->type].score);
-                }
-            }
-        }
-    }
-}
+ bool Damage_Determination(void){
+      bool hit = false;
 
-//zombie attack logic
-for(int i=0;i<MAX_ZOMBIES;i++){
-    if(!zombie_instances[i].is_alive) continue;
+      // shooter damage logic
+      for(int row=0;row<3;row++){
+          for(int col=0;col<5;col++){
+              if(battle_grid[row][col]==plant_shooter){
+                  zombieinstance_t* target_zombie = NULL;
+                  int max_x = -1;
+                  for(int i=0;i<MAX_ZOMBIES;i++){
+                      if(zombie_instances[i].is_alive && zombie_instances[i].row == row){
+                          if(zombie_instances[i].x > max_x){
+                              max_x = zombie_instances[i].x;
+                              target_zombie = &zombie_instances[i];
+                          }
+                      }
+                  }
+                  if(target_zombie != NULL){
+                      target_zombie->health -= plant_status[plant_shooter].DPS;
+                      target_zombie->hit_time = HAL_GetTick(); 
+                      hit = true;
+                      if(target_zombie->health <= 0){
+                          target_zombie->is_alive = false;
+                          zombie_count--;
+                          Score_Add(zombie_status[target_zombie->type].score);
+                      }
+                  }
+              }
+          }
+      }
 
-    int row = zombie_instances[i].row;
-    int col = -1;
-    bool plant_in_front = false;
+      // zombie attack logic
+      for(int i=0;i<MAX_ZOMBIES;i++){
+          if(!zombie_instances[i].is_alive) continue;
 
-    for(int c=0; c<5; c++){
-        if (zombie_instances[i].x >= b_x[c] && zombie_instances[i].x < b_x[c] + cell_width) {
-            if (battle_grid[row][c] != plant_none) {
-                col = c;
-                plant_in_front = true;
-                break;
-            }
-        }
-    }
+          int row = zombie_instances[i].row;
+          int col = -1;
+          bool plant_in_front = false;
 
-    if(plant_in_front){
-        zombie_instances[i].is_attacking = true;
-        int damage = zombie_status[zombie_instances[i].type].DPS;
-        plant_health[row][col] -= damage;
-        if(plant_health[row][col] <= 0){
-            battle_grid[row][col] = plant_none;
-            plant_health[row][col] = 0;
-            //If plant is gone, zombie can move again
-            zombie_instances[i].is_attacking = false; 
-        }
-    } else {
-        zombie_instances[i].is_attacking = false;
-    }
-}
-}
+          for(int c=0; c<5; c++){
+              if (zombie_instances[i].x >= b_x[c] && zombie_instances[i].x < b_x[c] + cell_width) {
+                  if (battle_grid[row][c] != plant_none) {
+                      col = c;
+                      plant_in_front = true;
+                      break;
+                  }
+              }
+          }
+
+          if(plant_in_front){
+              zombie_instances[i].is_attacking = true;
+              if(battle_grid[row][col] != plant_bomb){
+                  int damage = zombie_status[zombie_instances[i].type].DPS;
+                  plant_health[row][col] -= damage;
+                  if(plant_health[row][col] <= 0){
+                      battle_grid[row][col] = plant_none;
+                      plant_health[row][col] = 0;
+                      zombie_instances[i].is_attacking = false;
+                  }
+              }
+          } else {
+              zombie_instances[i].is_attacking = false;
+          }
+      }
+
+      return hit;
+  }
 void Score_Add(int score){
     game_score+=score;
 }

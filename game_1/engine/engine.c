@@ -47,7 +47,7 @@ bool Is_nuclaunched(void);
 //define doomshroom selection area
 #define doomshroom_select_x 179
 #define doomshroom_select_y 10
-#define doomshroom_select_width 50
+#define doomshroom_select_width 69
 #define doomshroom_select_height 51
 //define shovel selection area
 #define shovel_select_x 0
@@ -192,7 +192,7 @@ static uint32_t doomshroom_last_charge_time = 0;
 bool Is_nuclaunched(void){
     return nuclaunch;// if true return to main menu
 }
-
+extern uint32_t last_damage_time;
 //game engine logic
 void Engine_Init(void){
 current_selection = select_none;
@@ -212,7 +212,7 @@ for(int row=0;row<b_rows;row++){
 Zombie_Init();
 }
 void Engine_Update(void){
-static uint32_t last_damage_time=0;
+
 static uint32_t last_frame_time=0;
 uint32_t now=HAL_GetTick();
 
@@ -306,6 +306,7 @@ switch (current_selection) {
         bomb_state == BOMB_IDLE) {  
         battle_grid[sel_row][sel_col] = plant_bomb;
         bomb_planted_time[sel_row][sel_col]=HAL_GetTick();
+        plant_health[sel_row][sel_col] = plant_status[plant_bomb].max_health;
         current_selection = select_none;
         bomb_state = BOMB_CHARGING;
         bomb_timer_start = HAL_GetTick();
@@ -329,8 +330,11 @@ switch (current_selection) {
 }
 Zombie_Update(delta);
 if(now-last_damage_time>=1000){
-last_damage_time=now;
-Damage_Determination();
+    if(Damage_Determination()){       
+        last_damage_time = now;        
+    } else {
+        last_damage_time = now - SHOOT_ANIM; 
+    }
 }
 
 
@@ -523,16 +527,16 @@ LCD_printString(score_str,0,0,1,1);
 
 //background for select plants
 
-LCD_Draw_Sprite(77, 10, 50, 51, (const uint8_t*)TEST_select_walnut);
+LCD_Draw_Sprite(77, 10, 50, 51, (const uint8_t*)Select_wallnut);
 LCD_Draw_Sprite(26, 10, 50, 51, (const uint8_t*)TEST_select_shooter);
 LCD_Draw_Sprite(128, 10, 50, 51, (const uint8_t*)TEST_select_bomb);
-LCD_Draw_Sprite(179, 10, 50, 71, (const uint8_t*)TEST_select_doomshroom);
-LCD_Draw_Sprite(220, 90, 50, 20, (const uint8_t *)TEST_GENERATE); 
-LCD_Draw_Sprite(220, 140, 50, 20, (const uint8_t *)TEST_GENERATE); 
-LCD_Draw_Sprite(220, 190, 50, 20, (const uint8_t *)TEST_GENERATE); 
-LCD_Draw_Sprite(0, 90, 50, 10, (const uint8_t *)TEST_faildetect); 
-LCD_Draw_Sprite(0, 140, 50, 10, (const uint8_t *)TEST_faildetect); 
-LCD_Draw_Sprite(0, 190, 50, 10, (const uint8_t *)TEST_faildetect); 
+LCD_Draw_Sprite(179, 10, 51, 69, (const uint8_t*)Select_doomshroom);
+LCD_Draw_Sprite(220, 90, 50, 20, (const uint8_t *)generate); 
+LCD_Draw_Sprite(220, 140, 50, 20, (const uint8_t *)generate); 
+LCD_Draw_Sprite(220, 190, 50, 20, (const uint8_t *)generate); 
+LCD_Draw_Sprite(0, 90, 50, 10, (const uint8_t *)dependfail); 
+LCD_Draw_Sprite(0, 140, 50, 10, (const uint8_t *)dependfail); 
+LCD_Draw_Sprite(0, 190, 50, 10, (const uint8_t *)dependfail); 
 LCD_Draw_Sprite(0, 60, 30, 26, (const uint8_t *)TEST_SHOVEL);
  if(shovel_mod)  {
     LCD_Draw_Rect(0, 60, 26, 30, 2, 0);
@@ -610,11 +614,15 @@ for (int row = 0; row < b_rows; row++) {
             const uint8_t* sprite = NULL;
             switch(battle_grid[row][col]){
                 case plant_wallnut:
-                    sprite = (const uint8_t*)TEST_wallnut;
+                    sprite = (const uint8_t*)test_wallnut;
                break;
                 case plant_shooter:
-                    sprite = (const uint8_t*)TEST_shooter;
-                    break;
+             if ((HAL_GetTick() - last_damage_time) < SHOOT_ANIM) {
+               sprite = (const uint8_t*)shooter_frames[1];     
+              } else {
+               sprite = (const uint8_t*)shooter_frames[0];  
+              }
+             break;
                 case plant_bomb:
                     sprite = (const uint8_t*) TEST_BOMB_FRAMES[0];
                     break;
@@ -628,9 +636,9 @@ for (int row = 0; row < b_rows; row++) {
                 case plant_none:
            default:
             if (col == sel_col && row == sel_row&&current_selection!=select_none) {
-                sprite = (const uint8_t*)TEST_GRASS_FRAME1;
+                sprite = (const uint8_t*)test_grass_frame1;
             } else {
-                sprite = (const uint8_t*)TEST_GRASS_FRAME0;
+                sprite = (const uint8_t*)test_grass_frame0;
             } 
             break;
             }
