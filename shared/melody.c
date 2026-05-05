@@ -251,24 +251,137 @@ int SWD[] = {
 
 
 int ACM[] = {
-        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_E4, NOTE_D4,
-        NOTE_E4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
-        NOTE_G4, NOTE_D4, NOTE_G4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
-        NOTE_F4, NOTE_D4, NOTE_E4, NOTE_D4, NOTE_E4, NOTE_D4, NOTE_F4, NOTE_D4,
-        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_E4, NOTE_D4, NOTE_A4, NOTE_D5,
-        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_E4, NOTE_D4,
-        NOTE_E4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
-        NOTE_G4, NOTE_D4, NOTE_A4, NOTE_D5, NOTE_F5, NOTE_D5, NOTE_F5, NOTE_D5,
-        NOTE_E5, NOTE_D5, NOTE_F5, NOTE_D5, NOTE_F5, NOTE_D5, NOTE_F5, NOTE_D5,
-        NOTE_AS4, NOTE_F4, NOTE_E4, NOTE_D4, NOTE_A3, NOTE_C4, NOTE_D4, NOTE_F4,
-        NOTE_E4, NOTE_D4, NOTE_F4, NOTE_C4, NOTE_D4, NOTE_A4, NOTE_REST, NOTE_F4,
-        NOTE_G4, NOTE_G4, NOTE_A4, NOTE_AS4, NOTE_AS4, NOTE_A4, NOTE_G4, NOTE_A4,
-        NOTE_E4, NOTE_D4, NOTE_E4, NOTE_F4, NOTE_E4, NOTE_D4, NOTE_A3, NOTE_C4,
-        NOTE_D4, NOTE_F4, NOTE_E4, NOTE_D4, NOTE_A3, NOTE_C4, NOTE_D4, NOTE_F5,
-        NOTE_E5, NOTE_D5, NOTE_D5, NOTE_C5, NOTE_D5, NOTE_C5, NOTE_REST, NOTE_C5,
-        NOTE_C5, NOTE_G4, NOTE_A4, NOTE_AS4, NOTE_C5, NOTE_C5, NOTE_A5, NOTE_REST,
-        NOTE_F4, NOTE_D5, NOTE_D5, NOTE_D4, NOTE_E4, NOTE_F4, NOTE_E4, NOTE_D4,
-        NOTE_A3, NOTE_C4, NOTE_D4, NOTE_D4
+        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
+
+        NOTE_E4, NOTE_D4, NOTE_E4, NOTE_D4,
+
+        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
+
+        NOTE_G4, NOTE_D4, NOTE_G4, NOTE_D4,
+
+        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,NOTE_F4, NOTE_D4,
+        
+        NOTE_E4, NOTE_D4, NOTE_E4, NOTE_D4,
+        
+        NOTE_F4, NOTE_D4,NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
+        
+        NOTE_E4, NOTE_D4, NOTE_A4, NOTE_D5,
+        
+        NOTE_F5, NOTE_D5, NOTE_F5, NOTE_D5,NOTE_E5, NOTE_D5,
+        
+        NOTE_F5, NOTE_D5, NOTE_F5, NOTE_D5,
+        
+        NOTE_F5, NOTE_D5,
+
+        NOTE_A5,
+
+        NOTE_REST,
+        
+        NOTE_F4, NOTE_E4, NOTE_D4,
+        
+        NOTE_A3,
+        
+        NOTE_C4,
+        
+        NOTE_D4, 
+        
+        NOTE_F4, NOTE_E4, NOTE_D4,
+        
+        NOTE_F4,
+        
+        NOTE_C4,
+        
+        NOTE_D4,
+        
+        NOTE_A4,
+        
+        NOTE_REST,
+        
+        NOTE_F4,
+
+        NOTE_G4,
+
+        NOTE_REST,
+        
+        NOTE_G4,
+        
+        NOTE_A4,
+        
+        NOTE_AS4,
+        
+        NOTE_AS4, NOTE_A4, NOTE_G4,
+        
+        NOTE_A4,
+
+        NOTE_E4,
+        
+        NOTE_D4,
+        
+        NOTE_E4,
+        
+        NOTE_F4, NOTE_E4, NOTE_D4,
+        
+        NOTE_A3,
+        
+        NOTE_C4,
+
+        NOTE_D4,
+        
+
+
+        //NOTE_F5, NOTE_E5, NOTE_D5,
+        
+        //NOTE_A4,
+        
+        //NOTE_C5,
+        
+        //NOTE_D5,
+        
+        //NOTE_F5, NOTE_E5, NOTE_D5,
+        
+        //NOTE_F5,
+        
+        //NOTE_C5,
+        
+        //NOTE_D5,
+        
+        //NOTE_A5,
+
+        //NOTE_F5,
+
+        //NOTE_FS5,
+        
+        //NOTE_G5,
+        
+        //NOTE_A5,
+        
+        //NOTE_AS5,
+        
+        //NOTE_A5,
+        
+        //NOTE_G5,
+        
+        //NOTE_A5,
+        
+        //NOTE_REST,
+
+        //NOTE_E5,
+        
+        //NOTE_AS5,
+
+        //NOTE_REST,
+        
+        //NOTE_AS5,
+        
+        //NOTE_D5,
+        
+        //NOTE_E5,
+        
+        //NOTE_F5, NOTE_E5, NOTE_D5,
+        
+        //NOTE_A4, NOTE_C5, NOTE_D5, NOTE_D5,
+
+        //NOTE_REST
 };
 
 int ACD[] = {
@@ -277,17 +390,24 @@ int ACD[] = {
         8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8,
-        1, 6, 6, 6, 2, 2, 2, 6,
-        6, 6, 2, 2, 4, 4, 8, 8,
-        2, 4, 4, 2, 6, 6, 6, 2,
-        4, 4, 4, 6, 6, 6, 2, 2,
-        2, 6, 6, 6, 2, 2, 2, 4,
-        4, 4, 2, 2, 4, 4, 8, 8,
-        2, 4, 4, 2, 4, 4, 4, 8,
-        8, 2, 4, 4, 4, 6, 6, 6,
-        2, 2, 1, 4
+        8, 8, 8, 8,8, 8, 8, 8, 8, 8, 8, 8,
+        2,
+
+        4,
+        
+        6, 6, 6, 2, 2, 2,
+        6, 6, 6, 2, 4, 4, 4, 16,
+        8, 4, 32,
+        4, 4, 2,
+        6, 6, 6, 2,
+        4, 4, 4,
+        6, 6, 6, 2, 2, 1,
+
+        //6, 6, 6, 2, 2, 2, 4,
+        //4, 4, 2, 2, 4, 4, 8,
+        //2, 4, 4, 2, 4, 4, 4, 8,
+        //8, 2, 16, 4, 4, 4, 6, 6, 6,
+        //2, 2, 1, 4,
+
+        0
 };

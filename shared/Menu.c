@@ -275,7 +275,7 @@ MenuState Menu_Run(MenuSystem* menu) {
             }
 
             if (launch_timer == 0 && !isMusicPlaying()) {
-                startMelody(ACM, ACD, AC_MELODY_LENGTH, 120);
+                startMelody(ACM, ACD, AC_MELODY_LENGTH, 140);
             }
 
             // Render menu
