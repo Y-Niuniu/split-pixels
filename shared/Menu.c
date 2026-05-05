@@ -175,12 +175,12 @@ MenuState Menu_Run(MenuSystem* menu) {
         if (!title_finished) {
             if (HAL_GetTick() - title_start_time >= 3000) {
                 title_finished = true;
-              startMelody(melody, durations, MELODY_LENGTH, 90);
+              startMelody(SWM, SWD, SW_MELODY_LENGTH, 120);
             }
             
             if (current_input.btn3_pressed || current_input.btn9_pressed) {
                 title_finished = true;
-              startMelody(melody, durations, MELODY_LENGTH, 90);
+              startMelody(SWM, SWD, SW_MELODY_LENGTH, 120);
             }
            
             render_title();
