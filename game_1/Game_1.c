@@ -303,7 +303,7 @@ static bool Game1_Update(void) {
     LCD_printString("Zombie eat ", 15, 100, 0, 3);
     LCD_printString("your brain!!", 15, 140, 0, 3);
     LCD_Refresh(&cfg0);
-    HAL_Delay(3000);
+    HAL_Delay(5000);
     return false;
    }
 
