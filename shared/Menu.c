@@ -197,9 +197,10 @@ MenuState Menu_Run(MenuSystem* menu) {
             render_story(line_offset);
 
             
-            line_offset -= 1;  
+            line_offset -= 1;
             if (line_offset < -TEXT_HEIGHT) {
-                story_finished = true;  
+                stopMusic();
+                story_finished = true;
             }
         } else {
            
@@ -272,7 +273,11 @@ MenuState Menu_Run(MenuSystem* menu) {
             } else {
                 launch_timer = 0;
             }
-            
+
+            if (launch_timer == 0 && !isMusicPlaying()) {
+                startMelody(ACM, ACD, AC_MELODY_LENGTH, 120);
+            }
+
             // Render menu
             render_home_menu(menu);
         }

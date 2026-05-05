@@ -51,4 +51,8 @@ void stopMusic(void) {  //stop the music immediately
     is_playing_melody = 0;
     buzzer_off(&buzzer_cfg);
 }
+
+int isMusicPlaying(void) {
+    return is_playing_melody;
+}
 //you can add "int length = sizeof(melody) / sizeof(melody[0]);" in game.c to calculate the length more easier

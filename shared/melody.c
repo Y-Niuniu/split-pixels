@@ -160,23 +160,23 @@ int SWM[] = {
 
     NOTE_D5, NOTE_A4,
 
-    //NOTE_D4, NOTE_D4,
+    NOTE_D4, NOTE_D4,
 
-    //NOTE_E4, NOTE_E4,
+    NOTE_E4, NOTE_E4,
     
-    //NOTE_C5, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_REST,
+    NOTE_C5, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_REST,
 
-    //NOTE_G4, NOTE_B4, NOTE_A4, NOTE_E4,
+    NOTE_G4, NOTE_B4, NOTE_A4, NOTE_E4,
     
-    //NOTE_FS4, NOTE_D4, NOTE_D4,
+    NOTE_FS4, NOTE_D4, NOTE_D4,
 
-    //NOTE_CS5, NOTE_C5,
+    NOTE_CS5, NOTE_C5,
 
-    //NOTE_B4, NOTE_AS4,
+    NOTE_B4, NOTE_AS4,
 
-    //NOTE_A4, NOTE_G4,
+    NOTE_A4, NOTE_G4,
 
-    //NOTE_DS5,
+    NOTE_DS5,
 
     
 
@@ -187,7 +187,7 @@ int SWM[] = {
     NOTE_REST
 };
 
-int SWD[] = {  
+int SWD[] = {
     12,12,12,
 
     2,2,
@@ -222,29 +222,72 @@ int SWD[] = {
 
     4,2,
 
-    //8,8,
+    8,8,
 
-    //4,4,
-    
-    //12,12,12,12,8,
+    4,4,
 
-    //12,12,12,12,
-    
-    //4,8,8,
+    12,12,12,12,8,
 
-    //12,12,
+    12,12,12,12,
 
-    //12,12,
+    4,8,8,
 
-    //12,12,
+    12,12,
 
-    //2,
+    12,12,
+
+    12,12,
+
+    2,
 
 
 
-    
-    
-    
-    
+
+
+
+
     0
+};
+
+
+int ACM[] = {
+        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_E4, NOTE_D4,
+        NOTE_E4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
+        NOTE_G4, NOTE_D4, NOTE_G4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
+        NOTE_F4, NOTE_D4, NOTE_E4, NOTE_D4, NOTE_E4, NOTE_D4, NOTE_F4, NOTE_D4,
+        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_E4, NOTE_D4, NOTE_A4, NOTE_D5,
+        NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_E4, NOTE_D4,
+        NOTE_E4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4, NOTE_F4, NOTE_D4,
+        NOTE_G4, NOTE_D4, NOTE_A4, NOTE_D5, NOTE_F5, NOTE_D5, NOTE_F5, NOTE_D5,
+        NOTE_E5, NOTE_D5, NOTE_F5, NOTE_D5, NOTE_F5, NOTE_D5, NOTE_F5, NOTE_D5,
+        NOTE_AS4, NOTE_F4, NOTE_E4, NOTE_D4, NOTE_A3, NOTE_C4, NOTE_D4, NOTE_F4,
+        NOTE_E4, NOTE_D4, NOTE_F4, NOTE_C4, NOTE_D4, NOTE_A4, NOTE_REST, NOTE_F4,
+        NOTE_G4, NOTE_G4, NOTE_A4, NOTE_AS4, NOTE_AS4, NOTE_A4, NOTE_G4, NOTE_A4,
+        NOTE_E4, NOTE_D4, NOTE_E4, NOTE_F4, NOTE_E4, NOTE_D4, NOTE_A3, NOTE_C4,
+        NOTE_D4, NOTE_F4, NOTE_E4, NOTE_D4, NOTE_A3, NOTE_C4, NOTE_D4, NOTE_F5,
+        NOTE_E5, NOTE_D5, NOTE_D5, NOTE_C5, NOTE_D5, NOTE_C5, NOTE_REST, NOTE_C5,
+        NOTE_C5, NOTE_G4, NOTE_A4, NOTE_AS4, NOTE_C5, NOTE_C5, NOTE_A5, NOTE_REST,
+        NOTE_F4, NOTE_D5, NOTE_D5, NOTE_D4, NOTE_E4, NOTE_F4, NOTE_E4, NOTE_D4,
+        NOTE_A3, NOTE_C4, NOTE_D4, NOTE_D4
+};
+
+int ACD[] = {
+        8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8,
+        1, 6, 6, 6, 2, 2, 2, 6,
+        6, 6, 2, 2, 4, 4, 8, 8,
+        2, 4, 4, 2, 6, 6, 6, 2,
+        4, 4, 4, 6, 6, 6, 2, 2,
+        2, 6, 6, 6, 2, 2, 2, 4,
+        4, 4, 2, 2, 4, 4, 8, 8,
+        2, 4, 4, 2, 4, 4, 4, 8,
+        8, 2, 4, 4, 4, 6, 6, 6,
+        2, 2, 1, 4
 };
