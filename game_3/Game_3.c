@@ -30,19 +30,28 @@ MenuState Game3_Run(void) {
 
     // Startup animation
     LCD_printString("ASTRO",  70, 40, 1, 4);
-    LCD_printString("PARTY",  70, 70, 1, 4);
+    LCD_printString("PIXELs",  70, 70, 1, 4);
     LCD_Refresh(&cfg0);
-    HAL_Delay(1000);
+    HAL_Delay(2000);
+    
+    LCD_Fill_Buffer(0);
+    LCD_printString("Now that you have mastered all that you need,", 10, 30, 1, 1.7);
+    LCD_printString("the time has come to face each other in battle!", 10, 50, 1, 1.4);
+    LCD_printString("Only one will rise above the chaos,", 10, 70, 1, 1.4);
+    LCD_printString("Only one will claim victory,", 10, 90, 1, 1.4);
+    LCD_printString("And the winner, shall become the True Pixel.", 10, 110, 1, 1.4);
+    LCD_Refresh(&cfg0);
+    HAL_Delay(7000);
     
     // Display instructions
     LCD_Fill_Buffer(0);
-    LCD_printString("Press and hold BTN2 and BTN6", 50, 30, 1, 2);
-    LCD_printString("to change", 50, 60, 1, 2);
-    LCD_printString("direction and shoot!", 50, 85, 1, 2);
+    LCD_printString("Press and hold", 50, 30, 1, 2);
+    LCD_printString("right btn to move", 50, 60, 1, 2);
+    LCD_printString("Press left btn to shoot", 50, 70, 1, 2);
     LCD_Refresh(&cfg0);
-    HAL_Delay(2000);
+    HAL_Delay(7000);
 
-    printf("Astro Party Game initialized.\n");
+    printf("Astro PIXELs Game initialized.\n");
 
     // Play a brief startup sound
     buzzer_tone(&buzzer_cfg, 1500, 30);  // 1.5kHz at 30% volume
@@ -98,9 +107,9 @@ MenuState Game3_Run(void) {
         if (astro_engine.round_screen != ROUND_SCREEN_NONE) {
             LCD_Fill_Buffer(0);
             if (astro_engine.round_screen == ROUND_SCREEN_NEXT) {
-                LCD_printString("NEXT ROUND", 45, 50, 1, 4);
+                LCD_printString("NEXT ROUND", 20, 50, 1, 4);
             } else if (astro_engine.round_screen == ROUND_SCREEN_FINAL) {
-                LCD_printString("FINAL ROUND", 40, 50, 1, 4);
+                LCD_printString("FINAL ROUND", 20, 50, 1, 4);
             }
             LCD_printString("Get ready!", 60, 90, 1, 2);
             LCD_Refresh(&cfg0);
