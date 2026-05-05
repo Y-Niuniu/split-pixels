@@ -109,6 +109,7 @@ static bool Game1_Update_Instruction(void) {
         current_input.btn6_pressed || current_input.btn7_pressed ||
         current_input.btn9_pressed) {
         current_state = RUNNING;
+        startMelody(BM, BD, B_MELODY_LENGTH , 120);
         return true;
     }
     return true;
