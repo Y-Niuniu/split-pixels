@@ -1,7 +1,7 @@
 #include "music.h"
 
-static int current_melody[512];  //maximun melody length
-static int current_durations[512];  //node durations
+static int current_melody[2048];
+static int current_durations[2048];
 static int current_length = 0;  
 static int current_index = 0;
 static int wholenote = 0;

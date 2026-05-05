@@ -13,6 +13,8 @@
 #include "shared/selector.h"
 #include "sprites/bullet_background.h"
 #include"engine/engine.h"
+#include "melody.h"
+#include "music.h"
 bool IsGameOver(void);
 extern ST7789V2_cfg_t cfg0;
 extern PWM_cfg_t pwm_cfg;
@@ -109,6 +111,7 @@ static bool Game1_Update_Instruction(void) {
         current_input.btn6_pressed || current_input.btn7_pressed ||
         current_input.btn9_pressed) {
         current_state = RUNNING;
+        startMelody(BM_MELODY, BM_DURATION, BM_MELODY_LENGTH, 120);
         return true;
     }
     return true;
@@ -221,6 +224,7 @@ static bool Game1_Update_Running(void) {
     HandleGlobalCursor();
   if(Is_nuclaunched()){
     current_state=NULCEND;
+    stopMusic();
     doomshroom_timer_start = HAL_GetTick();
     return true;
   }
@@ -246,7 +250,8 @@ static bool Game1_Update_Paused(void) {
         current_state = RUNNING;
         return true;
     } else {
-        return false; 
+        stopMusic();
+        return false;
     }
 }
 
@@ -291,6 +296,7 @@ static bool Game1_Update(void) {
             break;
     }
    if(IsVictory()){
+    stopMusic();
     LCD_Fill_Buffer(1);
     LCD_printString("VICTORY!", 80, 100, 0, 3);
     LCD_Refresh(&cfg0);
@@ -298,6 +304,7 @@ static bool Game1_Update(void) {
     return false;
    }
    if(IsGameOver()){
+    stopMusic();
     LCD_Fill_Buffer(1);
     LCD_printString("Zombie eat ", 15, 100, 0, 3);
     LCD_printString("your brain!!", 15, 140, 0, 3);
@@ -344,7 +351,9 @@ MenuState Game1_Run(void) {
      Zombie_ResetGameStartTime(); 
     while (1) {
         uint32_t frame_start = HAL_GetTick();
-        
+
+        updateMusic();
+
         if (!Game1_Update()) {
             break;
         }
