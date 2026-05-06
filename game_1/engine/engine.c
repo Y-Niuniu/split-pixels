@@ -242,7 +242,7 @@ else{
                cursor_y >= shooter_select_y && cursor_y <= shooter_select_y + shooter_select_height) {
             current_selection = select_shooter;
     } else if (cursor_x >= bomb_select_x && cursor_x <= bomb_select_x + bomb_select_width &&
-               cursor_y >= bomb_select_y && cursor_y <= bomb_select_y + bomb_select_height && Score_Get() >= 600) {
+               cursor_y >= bomb_select_y && cursor_y <= bomb_select_y + bomb_select_height && Score_Get() >= 0) {
             current_selection = select_bomb;
     } else if (cursor_x >= doomshroom_select_x && cursor_x <= doomshroom_select_x + doomshroom_select_width &&
                cursor_y >= doomshroom_select_y && cursor_y <= doomshroom_select_y + doomshroom_select_height &&
@@ -363,7 +363,7 @@ if(current_input.btn9_pressed){
 
 switch (walnut_state) {
     case WALNUT_CHARGING:
-        if ((HAL_GetTick() - wallnut_timer_start) >= 8000) {
+        if ((HAL_GetTick() - wallnut_timer_start) >= 7500) {
             walnut_state = WALNUT_READY;
         }
         break;
@@ -391,7 +391,7 @@ switch (walnut_state) {
 }
 switch (shooter_state) {
     case SHOOTER_CHARGING:
-        if ((HAL_GetTick() - shooter_timer_start) >= 5700) {
+        if ((HAL_GetTick() - shooter_timer_start) >= 5500) {
             shooter_state = SHOOTER_READY;
         }
         break;
@@ -421,7 +421,7 @@ switch (shooter_state) {
 
 switch (bomb_state) {
     case BOMB_CHARGING:
-        if ((HAL_GetTick() - bomb_timer_start) >= 12000) {
+        if ((HAL_GetTick() - bomb_timer_start) >= 9600) {
             bomb_state = BOMB_READY;
         }
         break;
@@ -485,7 +485,7 @@ switch (doomshroom_state) {
 for (int row = 0; row < b_rows; row++) {
     for (int col = 0; col < b_cols; col++) {
         if (battle_grid[row][col] == plant_bomb && bomb_planted_time[row][col] != 0) {
-            if (HAL_GetTick() - bomb_planted_time[row][col] > 1500) { 
+            if (HAL_GetTick() - bomb_planted_time[row][col] > 500) { 
                 Explode(row, col);
                 battle_grid[row][col] = plant_bomb_exploded;
                 bomb_planted_time[row][col] = HAL_GetTick(); // Reset timer for removal animation
