@@ -436,3 +436,36 @@ int PVZWIND[] = {
 
         0
 };
+
+int PVZLOSEM[]= {
+        NOTE_E5, NOTE_F4, NOTE_C5, NOTE_E4,
+
+        NOTE_DS4, NOTE_E4,
+        NOTE_DS4, NOTE_E4,
+        NOTE_DS4, NOTE_E4,
+        NOTE_DS4, NOTE_E4,
+        NOTE_DS4, NOTE_E4,
+        NOTE_DS4, NOTE_E4,
+        NOTE_DS4, NOTE_E4,
+        NOTE_DS4, NOTE_E4,
+        NOTE_DS4,
+
+
+
+        NOTE_REST
+};
+int PVZLOSED[]= {
+        4,4,4,4,
+        32,32,
+        32,32,
+        32,32,
+        32,32,
+        32,32, 
+        32,32,
+        32,32,
+        32,32,
+        2,
+
+
+        0
+};
