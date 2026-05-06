@@ -14,6 +14,8 @@ int max_health;
 int DPS;
 float speed_pix_per_sec;
 int score;
+uint8_t h;
+uint8_t w;
 const uint8_t *sprite;
 }Zombiestatus_t;
 

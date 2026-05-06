@@ -305,7 +305,7 @@ static bool Game1_Update(void) {
     LCD_printString("Zombie eat ", 15, 100, 0, 3);
     LCD_printString("your brain!!", 15, 140, 0, 3);
     LCD_Refresh(&cfg0);
-    HAL_Delay(5000);
+    HAL_Delay(3000);
     return false;
    }
 
@@ -351,6 +351,7 @@ MenuState Game1_Run(void) {
         if (!Game1_Update()) {
             break;
         }
+        updateMusic();
         Game1_Render();
         
         uint32_t frame_time = HAL_GetTick() - frame_start;
