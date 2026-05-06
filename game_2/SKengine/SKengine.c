@@ -103,7 +103,7 @@ static void Engine_HandleInput(void) {
         Engine_SwitchWeapon(&player1);
     }
 
-    if (current_input.btn9_pressed) {
+    if (current_input.btn7_pressed) {
     if (!player2.is_active) {
         Engine_TryRevive(&player2);
     } else {
@@ -111,7 +111,7 @@ static void Engine_HandleInput(void) {
     }
 }
 
-    if (current_input.btn7_pressed && player2.is_active) {
+    if (current_input.btn9_pressed && player2.is_active) {
         Engine_SwitchWeapon(&player2);
     }
 }
