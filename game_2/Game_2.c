@@ -6,6 +6,7 @@
 #include "stm32l4xx_hal.h"
 #include <stdio.h>
 #include "SKengine/SKengine.h"
+#include "shared/selector.h" 
 
 extern ST7789V2_cfg_t cfg0;
 extern Buzzer_cfg_t buzzer_cfg;  // Buzzer control
@@ -26,6 +27,13 @@ extern Buzzer_cfg_t buzzer_cfg;  // Buzzer control
 // Frame rate for this game (in milliseconds) - runs slower than Game 1
 #define GAME2_FRAME_TIME_MS 50  // ~20 FPS (different from Game 1!)
 
+typedef enum {
+    GAME2_RUNNING,
+    GAME2_PAUSED,
+    GAME2_EXITING
+} Game2State_t;
+static Game2State_t current_state = GAME2_RUNNING;
+
 MenuState Game2_Run(void) {
     SKengine_Init();
 
@@ -36,12 +44,33 @@ MenuState Game2_Run(void) {
 
         Input_Read();
 
-        if (current_input.btn3_pressed) {
-            exit_state = MENU_STATE_HOME;
-            break;
+         switch (current_state) {
+            case GAME2_RUNNING:
+                if (current_input.btn3_pressed) {
+                    current_state = GAME2_PAUSED;
+                    break;
+                }
+                SKengine_Update();
+                break;
+
+            case GAME2_PAUSED: {
+                select_system_t selector;
+                Selector_Init(&selector);
+                operation_t result = Selector_Run(&selector);
+                if (result == RESUME) {
+                    current_state = GAME2_RUNNING;
+                } else {
+                    exit_state = MENU_STATE_HOME;
+                    return exit_state;
+                }
+                break;
+            }
+
+            default:
+                break;
         }
 
-        SKengine_Update();
+        SKengine_Draw();
         SKengine_Draw();
 
         LCD_Refresh(&cfg0);

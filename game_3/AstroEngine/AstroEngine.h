@@ -71,6 +71,8 @@ typedef struct {
     RoundScreen_t round_screen;
     GameState_t game_state;
     uint8_t winner;  // 1 or 2, 0 if no winner yet
+    uint16_t stars_x[200];  // Store x positions of background stars
+    uint16_t stars_y[200];  // Store y positions of background stars
 } AstroEngine_t;
 
 // Initialize astro engine

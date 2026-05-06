@@ -234,8 +234,8 @@ int main(void)
     LCD_Refresh(&cfg0);
 
     // Startup animation
-    LCD_printString("MENU SYSTEM", 40, 50, 1, 2);
-    LCD_printString("Starting...", 50, 100, 1, 2);
+    LCD_printString("MENU SYSTEM", 40, 50, 6, 1);
+    LCD_printString("Starting...", 50, 100, 6, 1);
     LCD_Refresh(&cfg0);
     HAL_Delay(1000);
     
