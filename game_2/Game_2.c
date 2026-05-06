@@ -28,48 +28,26 @@ extern Buzzer_cfg_t buzzer_cfg;  // Buzzer control
 #define GAME2_FRAME_TIME_MS 50  // ~20 FPS (different from Game 1!)
 
 typedef enum {
-    GAME2_INSTRUCTION,
     GAME2_RUNNING,
     GAME2_PAUSED,
     GAME2_EXITING
 } Game2State_t;
-static Game2State_t current_state = GAME2_INSTRUCTION;
-static void Game2_Render_Instruction(void) {
-    LCD_Fill_Buffer(0);
-    LCD_printString("SHOTGUN", 36, 30, 1, 3);
-    LCD_printString("KNIGHT", 48, 65, 1, 3);
-    LCD_printString("- Controls -", 65, 110, 1, 1);
-    LCD_printString("Joystick: Move character", 10, 135, 1, 2);
-    LCD_printString("BTN6:P1 attack/revive", 0, 150, 1, 2);
-    LCD_printString("BTN2:P1 switch weapon", 0, 165, 1, 2);
-    LCD_printString("BTN7:P2 attack/revive", 0, 175, 1, 2);
-    LCD_printString("BTN9:p2 switich weapon", 0, 185, 1, 2);
-    LCD_printString("BTN3: Pause / Exit", 0, 190, 1, 2);
-    LCD_printString("Press any button to start", 30, 215, 6, 1);
-
-    LCD_Refresh(&cfg0);
-}
+static Game2State_t current_state = GAME2_RUNNING;
 
 MenuState Game2_Run(void) {
     SKengine_Init();
-    current_state = GAME2_INSTRUCTION;
+
     MenuState exit_state = MENU_STATE_HOME;
 
     while (1) {
         uint32_t frame_start = HAL_GetTick();
+       LCD_Fill_Buffer(0);
+       LCD_Refresh(&cfg0);
+
+   
         Input_Read();
 
-
          switch (current_state) {
-            case GAME2_INSTRUCTION:
-                Game2_Render_Instruction();
-                 if (current_input.btn2_pressed || current_input.btn3_pressed ||
-                     current_input.btn6_pressed || current_input.btn7_pressed ||
-                     current_input.btn9_pressed) {
-                    current_state = GAME2_RUNNING;
-                    buzzer_tone(&buzzer_cfg, 1000, 200); // Play a tone when starting
-                }
-                break;
             case GAME2_RUNNING:
                 if (current_input.btn3_pressed) {
                     current_state = GAME2_PAUSED;
@@ -96,7 +74,8 @@ MenuState Game2_Run(void) {
         }
 
         SKengine_Draw();
-     
+        SKengine_Draw();
+
         LCD_Refresh(&cfg0);
 
         uint32_t frame_time = HAL_GetTick() - frame_start;
