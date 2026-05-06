@@ -411,3 +411,28 @@ int ACD[] = {
 
         0
 };
+
+
+int PVZWINM[] = {
+    NOTE_B4, NOTE_A4, NOTE_F4,
+    NOTE_C5, NOTE_B4, NOTE_A4,
+    NOTE_F4, NOTE_E4, NOTE_C4,
+    NOTE_B3, NOTE_A3, NOTE_F3,
+    NOTE_A3, NOTE_B3, NOTE_B3,
+    NOTE_C4, NOTE_E4, NOTE_E4,
+    NOTE_FS4,
+
+    NOTE_REST
+};
+
+int PVZWIND[] = {
+        8,8,4,
+        8,8,8,
+        8,4,8,
+        8,8,8,
+        8,6,8,
+        8,6,8,
+        2,
+
+        0
+};
