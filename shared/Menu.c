@@ -172,16 +172,16 @@
 //         Joystick_Read(&joystick_cfg, &joystick_data);
 //         Joystick_Read(&joystick_cfg2, &joystick_data2);
         
-//         if (!title_finished) {
-//             if (HAL_GetTick() - title_start_time >= 3000) {
-//                 title_finished = true;
-//               startMelody(melody, durations, MELODY_LENGTH, 90);
-//             }
+        if (!title_finished) {
+            if (HAL_GetTick() - title_start_time >= 3000) {
+                title_finished = true;
+              startMelody(melody, durations, MELODY_LENGTH, 90);
+            }
             
-//             if (current_input.btn3_pressed || current_input.btn9_pressed) {
-//                 title_finished = true;
-//               startMelody(melody, durations, MELODY_LENGTH, 90);
-//             }
+            if (current_input.btn3_pressed || current_input.btn9_pressed) {
+                title_finished = true;
+              startMelody(melody, durations, MELODY_LENGTH, 90);
+            }
            
 //             render_title();
 //         } else if (!story_finished) {

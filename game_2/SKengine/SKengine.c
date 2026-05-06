@@ -18,6 +18,9 @@ int team_score = 0;
 static float last_explosion_x = 0;
 static float last_explosion_y = 0;
 static uint32_t explosion_expire = 0;
+static float last_boomer_x = 0;
+static float last_boomer_y = 0;
+static uint32_t boomer_expire = 0;
 
 static void Engine_HandleInput(void);
 static void Engine_UpdatePlayers(void);
@@ -150,22 +153,22 @@ static void Engine_PlayerShoot(Player* p, Bullet pool[], int pool_size) {
 
         case WEAPON_PISTOL:
             the_Bullet_Fire(pool, pool_size, p->x, p->y, dx, dy,
-                            20.0f, 1, 2, BULLET_TEAM_PLAYER, BULLET_TYPE_NORMAL, 0, 0.0f);
+                            35.0f, 1, 3, BULLET_TEAM_PLAYER, BULLET_TYPE_NORMAL, 0, 0.0f);
             break;
 
         case WEAPON_RIFLE:
             p->burst_active    = 1;
-            p->burst_remaining = 2;
-            p->burst_next_time = HAL_GetTick() + 120;
+            p->burst_remaining = 5;
+            p->burst_next_time = HAL_GetTick() + 60;
             the_Bullet_Fire(pool, pool_size, p->x, p->y, dx, dy,
-                            20.0f, 1, 2, BULLET_TEAM_PLAYER, BULLET_TYPE_NORMAL, 0, 0.0f);
+                            35.0f, 1, 3, BULLET_TEAM_PLAYER, BULLET_TYPE_NORMAL, 0, 0.0f);
             break;
 
         case WEAPON_SHOTGUN: {
             float base_angle = atan2f(dy, dx);
             float spread = 25.0f * (3.14159f / 180.0f);
-            float step   = spread / 6.0f;
-            for (int i = 0; i < 7; i++) {
+            float step   = spread / 7.0f;
+            for (int i = 0; i < 8; i++) {
                 float angle = base_angle - (spread / 2.0f) + step * i;
                 the_Bullet_Fire(pool, pool_size, p->x, p->y,
                                 cosf(angle), sinf(angle),
@@ -177,7 +180,7 @@ static void Engine_PlayerShoot(Player* p, Bullet pool[], int pool_size) {
 
         case WEAPON_ROCKET:
             the_Bullet_Fire(pool, pool_size, p->x, p->y, dx, dy,
-                            5.0f, 1, 4, BULLET_TEAM_PLAYER, BULLET_TYPE_ROCKET, 2, 25.0f);
+                            5.0f, 1, 4, BULLET_TEAM_PLAYER, BULLET_TYPE_ROCKET, 2, 30.0f);
             break;
     }
 }
@@ -191,13 +194,13 @@ static void Engine_UpdatePlayers(void) {
                 float dy = target->y - player1.y;
                 the_Bullet_Fire(player_bullet_pool, MAX_BULLETS_PLAYER,
                                 player1.x, player1.y, dx, dy,
-                                20.0f, 1, 2, BULLET_TEAM_PLAYER, BULLET_TYPE_NORMAL, 0, 0.0f);
+                                35.0f, 1, 3, BULLET_TEAM_PLAYER, BULLET_TYPE_NORMAL, 0, 0.0f);
             }
             player1.burst_remaining--;
             if (player1.burst_remaining <= 0) {
                 player1.burst_active = 0;
             } else {
-                player1.burst_next_time = HAL_GetTick() + 120;
+                player1.burst_next_time = HAL_GetTick() + 60;
             }
         }
     }
@@ -210,13 +213,13 @@ static void Engine_UpdatePlayers(void) {
                 float dy = target->y - player2.y;
                 the_Bullet_Fire(player_bullet_pool, MAX_BULLETS_PLAYER,
                                 player2.x, player2.y, dx, dy,
-                                20.0f, 1, 2, BULLET_TEAM_PLAYER, BULLET_TYPE_NORMAL, 0, 0.0f);
+                                35.0f, 1, 3, BULLET_TEAM_PLAYER, BULLET_TYPE_NORMAL, 0, 0.0f);
             }
             player2.burst_remaining--;
             if (player2.burst_remaining <= 0) {
                 player2.burst_active = 0;
             } else {
-                player2.burst_next_time = HAL_GetTick() + 120;
+                player2.burst_next_time = HAL_GetTick() + 60;
             }
         }
     }
@@ -296,14 +299,27 @@ static void Engine_RocketExplode(float ex, float ey) {
         if (!enemies[i].is_active) continue;
         float dx = enemies[i].x - ex;
         float dy = enemies[i].y - ey;
-        if (sqrtf(dx*dx + dy*dy) <= 25.0f) {
+        if (sqrtf(dx*dx + dy*dy) <= 30.0f) {
             enemies[i].health -= 2;
             if (enemies[i].health <= 0) {
+                team_score++;
                 if (enemies[i].boomer) {
+                    last_boomer_x = enemies[i].x;
+                    last_boomer_y = enemies[i].y;
+                    boomer_expire = HAL_GetTick() + 300;
                     Enemy_CheckExplosionDamage(&enemies[i], &player1, &player2);
+                    for (int k = 0; k < MAX_ENEMIES; k++) {
+                        if (!enemies[k].is_active) continue;
+                        if (k == i) continue;
+                        float edx = enemies[k].x - enemies[i].x;
+                        float edy = enemies[k].y - enemies[i].y;
+                        if (sqrtf(edx*edx + edy*edy) <= enemies[i].explosion_radius) {
+                            Enemy_Deactivate(&enemies[k]);
+                            team_score++;
+                        }
+                    }
                 }
                 Enemy_Deactivate(&enemies[i]);
-                team_score++;
             }
         }
     }
@@ -326,7 +342,20 @@ static void Engine_CheckCollisions(void) {
                 e->health -= b->damage;
                 if (e->health <= 0) {
                     if (e->boomer) {
+                        last_boomer_x = e->x;
+                        last_boomer_y = e->y;
+                        boomer_expire = HAL_GetTick() + 300;
                         Enemy_CheckExplosionDamage(e, &player1, &player2);
+                        for (int k = 0; k < MAX_ENEMIES; k++) {
+                            if (!enemies[k].is_active) continue;
+                            if (&enemies[k] == e) continue;
+                            float edx = enemies[k].x - e->x;
+                            float edy = enemies[k].y - e->y;
+                            if (sqrtf(edx*edx + edy*edy) <= e->explosion_radius) {
+                                Enemy_Deactivate(&enemies[k]);
+                                team_score++;
+                            }
+                        }
                     }
                     Enemy_Deactivate(e);
                     team_score++;
@@ -428,7 +457,7 @@ void SKengine_Draw(void) {
 
 
     if (HAL_GetTick() < explosion_expire) {
-    LCD_Draw_Circle((uint16_t)last_explosion_x, (uint16_t)last_explosion_y, 25, 13, 0);
+    LCD_Draw_Circle((uint16_t)last_explosion_x, (uint16_t)last_explosion_y, 30, 13, 0);
     }
 
     LCD_printString("HP:P1", 0, 224, 6, 1);
@@ -447,6 +476,10 @@ void SKengine_Draw(void) {
     } else {
         LCD_Draw_Rect(191 + i * 7, 234, 6, 5, 3, 0);
     }
+    }
+
+    if (HAL_GetTick() < boomer_expire) {
+    LCD_Draw_Circle((uint16_t)last_boomer_x, (uint16_t)last_boomer_y, 35, 2, 0);
     }
 
     WaveDesign_DrawWarnings(&wavedesign);
