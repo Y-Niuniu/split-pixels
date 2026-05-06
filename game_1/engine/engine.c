@@ -242,7 +242,7 @@ else{
                cursor_y >= shooter_select_y && cursor_y <= shooter_select_y + shooter_select_height) {
             current_selection = select_shooter;
     } else if (cursor_x >= bomb_select_x && cursor_x <= bomb_select_x + bomb_select_width &&
-               cursor_y >= bomb_select_y && cursor_y <= bomb_select_y + bomb_select_height && Score_Get() >= 0) {
+               cursor_y >= bomb_select_y && cursor_y <= bomb_select_y + bomb_select_height && Score_Get() >= 600) {
             current_selection = select_bomb;
     } else if (cursor_x >= doomshroom_select_x && cursor_x <= doomshroom_select_x + doomshroom_select_width &&
                cursor_y >= doomshroom_select_y && cursor_y <= doomshroom_select_y + doomshroom_select_height &&
