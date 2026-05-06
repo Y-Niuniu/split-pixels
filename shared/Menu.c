@@ -26,12 +26,18 @@ static const char* background_story[]={
     "Prove yourself have ",
     "strength and courage ",
     "to be free,",
+    "",
     "The game challenge the skills",
     "of combat, colloberation",
     "and strategy.",
+    "Try to use your wistom to",
+    "Work with your teammate and",
+    " defeat your opponent",
     "",
     "The winner team will have",
     "great rewards.",
+    "And got a chance to",
+    "get super power",
     "",
     "JOIN THE SPLIT PIXELS!",
     "Begin your adventure", 
@@ -175,12 +181,12 @@ MenuState Menu_Run(MenuSystem* menu) {
         if (!title_finished) {
             if (HAL_GetTick() - title_start_time >= 3000) {
                 title_finished = true;
-              startMelody(PVZWINM, PVZWIND, PVZW_MELODY_LENGTH, 180);
+              startMelody(SWM, SWD, SW_MELODY_LENGTH, 120);
             }
             
             if (current_input.btn3_pressed || current_input.btn9_pressed) {
                 title_finished = true;
-              startMelody(PVZWINM, PVZWIND, PVZW_MELODY_LENGTH, 180);
+              startMelody(SWM, SWD, SW_MELODY_LENGTH, 120);
             }
            
             render_title();
