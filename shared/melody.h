@@ -5,7 +5,18 @@ extern int BM[];
 extern int BD[];
 extern int SWM[];
 extern int SWD[];
-#define B_MELODY_LENGTH 59
-#define SW_MELODY_LENGTH 61
+extern int ACM[];
+extern int ACD[];
+extern int PVZWINM[];
+extern int PVZWIND[];
+extern int PVZLOSEM[];
+extern int PVZLOSED[];
+
+#define B_MELODY_LENGTH 59 //bpm=90
+#define SW_MELODY_LENGTH 84 //bpm=120
+#define AC_MELODY_LENGTH 87 //bpm=140
+#define PVZW_MELODY_LENGTH 19 //bpm=180
+#define PVZL_MELODY_LENGTH 21 //bpm=120
+
 
 #endif

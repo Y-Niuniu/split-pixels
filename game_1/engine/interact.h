@@ -14,16 +14,20 @@ int row;
 int health;
 bool is_alive;
 bool is_attacking;
+uint32_t hit_time;
 uint8_t attack_interval;
 }zombieinstance_t;
 
 extern zombieinstance_t zombie_instances[MAX_ZOMBIES];
+extern uint32_t last_damage_time;
+#define HIT_FLASH 600
+#define SHOOT_ANIM 600
 
 void Zombie_Init(void);
 void Zombie_ResetGameStartTime(void);
 void Zombie_Update(uint32_t delta_ms);
 void Zombie_Render(void);
-void Damage_Determination(void);
+bool Damage_Determination(void);
 void Score_Add(int score);
 int Score_Get(void);
 uint32_t Game_time_pass(void);

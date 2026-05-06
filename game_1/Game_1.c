@@ -13,6 +13,8 @@
 #include "shared/selector.h"
 #include "sprites/bullet_background.h"
 #include"engine/engine.h"
+#include "music.h"
+#include "melody.h"
 bool IsGameOver(void);
 extern ST7789V2_cfg_t cfg0;
 extern PWM_cfg_t pwm_cfg;
@@ -109,6 +111,7 @@ static bool Game1_Update_Instruction(void) {
         current_input.btn6_pressed || current_input.btn7_pressed ||
         current_input.btn9_pressed) {
         current_state = RUNNING;
+        startMelody(BM, BD, B_MELODY_LENGTH , 90);
         return true;
     }
     return true;
@@ -293,17 +296,31 @@ static bool Game1_Update(void) {
    if(IsVictory()){
     LCD_Fill_Buffer(1);
     LCD_printString("VICTORY!", 80, 100, 0, 3);
+    startMelody(PVZWINM, PVZWIND,PVZW_MELODY_LENGTH,180);
     LCD_Refresh(&cfg0);
-    HAL_Delay(3000);
-    return false;
+    HAL_Delay(4000);
+    uint32_t end_time = HAL_GetTick() + 5000;
+        while (HAL_GetTick() < end_time) {
+        updateMusic();
+        HAL_Delay(10);
+        }
+        stopMusic();
+        return false;
    }
    if(IsGameOver()){
     LCD_Fill_Buffer(1);
     LCD_printString("Zombie eat ", 15, 100, 0, 3);
     LCD_printString("your brain!!", 15, 140, 0, 3);
+    startMelody(PVZLOSEM, PVZLOSED,PVZL_MELODY_LENGTH,120);
     LCD_Refresh(&cfg0);
-    HAL_Delay(3000);
-    return false;
+    HAL_Delay(4000);
+    uint32_t end_time = HAL_GetTick() + 5000;
+        while (HAL_GetTick() < end_time) {
+        updateMusic();
+        HAL_Delay(10);
+        }
+        stopMusic();
+        return false;
    }
 
 
@@ -323,8 +340,15 @@ static void Game1_Render(void) {
     if(current_state==NULCEND){
         LCD_Fill_Buffer(1);
         LCD_printString("BOOM!", 70, 120, 0, 4);
+         startMelody(PVZWINM, PVZWIND,PVZW_MELODY_LENGTH,180);
         LCD_Refresh(&cfg0);
-        return;
+        uint32_t end_time = HAL_GetTick() + 5000;
+        while (HAL_GetTick() < end_time) {
+        updateMusic();
+        HAL_Delay(10);
+        }
+        stopMusic();
+        return ;
     }
   
     LCD_Draw_Rect(cursor_x-2, cursor_y-2, 10, 10, 2, 1);
@@ -347,6 +371,10 @@ MenuState Game1_Run(void) {
         
         if (!Game1_Update()) {
             break;
+        }
+        updateMusic();
+        if (current_state == RUNNING && !isMusicPlaying()) {
+            startMelody(BM, BD, B_MELODY_LENGTH, 90);
         }
         Game1_Render();
         

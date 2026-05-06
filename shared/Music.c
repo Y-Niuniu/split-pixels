@@ -1,7 +1,7 @@
 #include "music.h"
 
-static int current_melody[512];  //maximun melody length
-static int current_durations[512];  //node durations
+static int current_melody[512];
+static int current_durations[512];
 static int current_length = 0;  
 static int current_index = 0;
 static int wholenote = 0;
@@ -50,5 +50,9 @@ void updateMusic(void) {
 void stopMusic(void) {  //stop the music immediately
     is_playing_melody = 0;
     buzzer_off(&buzzer_cfg);
+}
+
+int isMusicPlaying(void) {
+    return is_playing_melody;
 }
 //you can add "int length = sizeof(melody) / sizeof(melody[0]);" in game.c to calculate the length more easier
