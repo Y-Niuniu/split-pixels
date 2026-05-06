@@ -35,19 +35,25 @@ MenuState Game3_Run(void) {
     HAL_Delay(2000);
     
     LCD_Fill_Buffer(0);
-    LCD_printString("Now that you have mastered all that you need,", 10, 30, 1, 1.7);
-    LCD_printString("the time has come to face each other in battle!", 10, 50, 1, 1.4);
-    LCD_printString("Only one will rise above the chaos,", 10, 70, 1, 1.4);
-    LCD_printString("Only one will claim victory,", 10, 90, 1, 1.4);
-    LCD_printString("And the winner, shall become the True Pixel.", 10, 110, 1, 1.4);
+    LCD_printString("Now that you have", 1, 10, 1, 2);
+    LCD_printString("mastered all that", 1, 30, 1, 2);
+    LCD_printString("you need,", 1, 50, 1, 2);
+    LCD_printString("the time has come", 1, 70, 1, 2);
+    LCD_printString("to face each other", 1, 90, 1, 2);
+    LCD_printString("in deathly battles,", 1, 110, 1, 2);
+    LCD_printString("Only one survives,", 1, 130, 1, 2);
+    LCD_printString("And the winner,", 1, 150, 1, 2);
+    LCD_printString("shall become", 1, 170, 1, 2);
+    LCD_printString("True Pixel", 30, 200, 5, 3);
     LCD_Refresh(&cfg0);
     HAL_Delay(7000);
     
     // Display instructions
     LCD_Fill_Buffer(0);
-    LCD_printString("Press and hold", 50, 30, 1, 2);
-    LCD_printString("right btn to move", 50, 60, 1, 2);
-    LCD_printString("Press left btn to shoot", 50, 70, 1, 2);
+    LCD_printString("Press and hold", 10, 30, 1, 2);
+    LCD_printString("right btn to move", 10, 60, 1, 2);
+    LCD_printString("Press left btn", 10, 90, 1, 2);
+    LCD_printString("to shoot", 10, 120, 1, 2);
     LCD_Refresh(&cfg0);
     HAL_Delay(7000);
 
@@ -83,11 +89,11 @@ MenuState Game3_Run(void) {
             // Show end game screen
             LCD_Fill_Buffer(0);
             if (astro_engine.winner == 1) {
-                LCD_printString("SPACESHIP 1 WINS!", 30, 50, 1, 3);
+                LCD_printString("SPACESHIP 1 WINS!", 10, 50, 1, 3);
             } else if (astro_engine.winner == 2) {
-                LCD_printString("SPACESHIP 2 WINS!", 30, 50, 1, 3);
+                LCD_printString("SPACESHIP 2 WINS!", 10, 50, 1, 3);
             }
-            LCD_printString("Press BTN3 to return", 35, 90, 1, 2);
+            LCD_printString("Press BTN3 to return", 11, 90, 1, 2);
             LCD_Refresh(&cfg0);
             
             // Wait for button press to return to menu
@@ -107,9 +113,9 @@ MenuState Game3_Run(void) {
         if (astro_engine.round_screen != ROUND_SCREEN_NONE) {
             LCD_Fill_Buffer(0);
             if (astro_engine.round_screen == ROUND_SCREEN_NEXT) {
-                LCD_printString("NEXT ROUND", 20, 50, 1, 4);
+                LCD_printString("NEXT ROUND", 20, 50, 1, 3);
             } else if (astro_engine.round_screen == ROUND_SCREEN_FINAL) {
-                LCD_printString("FINAL ROUND", 20, 50, 1, 4);
+                LCD_printString("FINAL ROUND", 20, 50, 1, 3);
             }
             LCD_printString("Get ready!", 60, 90, 1, 2);
             LCD_Refresh(&cfg0);
