@@ -283,7 +283,7 @@ switch (current_selection) {
         battle_grid[sel_row][sel_col] == plant_none &&
         walnut_state == WALNUT_IDLE) {  
         battle_grid[sel_row][sel_col] = plant_wallnut;
-        plant_health[sel_row][sel_col]=600;
+        plant_health[sel_row][sel_col]=650;
         current_selection = select_none;
         walnut_state = WALNUT_CHARGING;
         wallnut_timer_start = HAL_GetTick();
@@ -294,7 +294,7 @@ switch (current_selection) {
         battle_grid[sel_row][sel_col] == plant_none &&
         shooter_state == SHOOTER_IDLE) {  
         battle_grid[sel_row][sel_col] = plant_shooter;
-        plant_health[sel_row][sel_col]=125;
+        plant_health[sel_row][sel_col]=175;
         current_selection = select_none;
         shooter_state = SHOOTER_CHARGING;
         shooter_timer_start = HAL_GetTick();
@@ -537,6 +537,10 @@ LCD_Draw_Sprite(220, 190, 50, 20, (const uint8_t *)generate);
 LCD_Draw_Sprite(0, 90, 50, 10, (const uint8_t *)dependfail); 
 LCD_Draw_Sprite(0, 140, 50, 10, (const uint8_t *)dependfail); 
 LCD_Draw_Sprite(0, 190, 50, 10, (const uint8_t *)dependfail); 
+LCD_Draw_Sprite(120,0,10,10,(const uint8_t *)TEST_ROWER);
+LCD_Draw_Sprite(160,0,10,10,(const uint8_t *)TEST_ROWER);
+LCD_Draw_Sprite(200,0,10,10,(const uint8_t *)TEST_ROWER);
+
 LCD_Draw_Sprite(0, 60, 30, 26, (const uint8_t *)TEST_SHOVEL);
  if(shovel_mod)  {
     LCD_Draw_Rect(0, 60, 26, 30, 2, 0);
@@ -647,4 +651,15 @@ for (int row = 0; row < b_rows; row++) {
     }
 }
 Zombie_Render();
+
+if(HAL_GetTick()>=0){
+    LCD_Draw_Rect(210,0,30,10,14,1);
+}else if(HAL_GetTick()>=60){
+    LCD_Draw_Rect(170,0,30,10,14,1);
+     LCD_Draw_Rect(210,0,30,10,6,1);
+}else if(HAL_GetTick()>=120){
+    LCD_Draw_Rect(130,0,30,10,2,1);
+     LCD_Draw_Rect(170,0,30,10,6,1);
+     LCD_Draw_Rect(210,0,30,10,14,1);
+}
 }
