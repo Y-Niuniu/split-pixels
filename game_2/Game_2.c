@@ -34,7 +34,7 @@ typedef enum {
     GAME2_EXITING
 } Game2State_t;
 static Game2State_t current_state = GAME2_INSTRUCTION;
-static Game2_Render_Instruction(void) {
+static void Game2_Render_Instruction(void) {
     LCD_Fill_Buffer(0);
     LCD_printString("SHOTGUN", 36, 30, 1, 3);
     LCD_printString("KNIGHT", 48, 65, 1, 3);
