@@ -41,9 +41,7 @@ MenuState Game2_Run(void) {
 
     while (1) {
         uint32_t frame_start = HAL_GetTick();
-       LCD_Fill_Buffer(0);
-       LCD_Refresh(&cfg0);
-
+     
    
         Input_Read();
 
